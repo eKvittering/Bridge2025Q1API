@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <VersionPrefix>1.0.0.0</VersionPrefix>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>Webminux.Optician.Application</AssemblyName>
+    <PackageId>Webminux.Optician.Application</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>Webminux.Optician</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Webminux.Optician.Core\Webminux.Optician.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CustomFields\Dtos\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Abp.HangFire.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+</Project>

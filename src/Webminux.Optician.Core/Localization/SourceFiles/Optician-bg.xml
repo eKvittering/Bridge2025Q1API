@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="bg">
+	<texts>
+
+		<text name="WelcomeMessage" value="Добре дошли в ERP" />
+		<text name="FormIsNotValidMessage" value="Формулярът не е валиден. Моля, проверете и коригирайте грешките." />
+		<text name="TenantNameCanNotBeEmpty" value="Име на наемател не може да бъде празно" />
+		<text name="InvalidUserNameOrPassword" value="Невалидно потребителско име или парола" />
+		<text name="ThereIsNoTenantDefinedWithName{0}" value="Няма наемател, определен с име {0}" />
+		<text name="TenantIsNotActive" value="Наемател {0} не е активен." />
+		<text name="UserIsNotActiveAndCanNotLogin" value="Потребителски {0} не е активен и не може да влезе в системата." />
+		<text name="UserEmailIsNotConfirmedAndCanNotLogin">Имейл адресът ви не е потвърден. Не можете да влезете.</text>
+		<text name="UserLockedOutMessage">The user account е била заключена. Моля, опитайте отново по-късно.</text>
+		<text name="PleaseEnterLoginInformation" value="Моля, въведете информация за вход" />
+		<text name="TenancyName" value="Име на наема" />
+		<text name="UserNameOrEmail" value="Потребителско име или имейл" />
+		<text name="Password" value="Парола" />
+		<text name="ResetPassword" value="Нулиране на парола" />
+		<text name="UpdatePassword" value="Парола за актуализиране" />
+		<text name="RememberMe" value="Запомни ме" />
+		<text name="LogIn" value="Вход" />
+		<text name="LoginFailed" value="Входът се провали!" />
+		<text name="NameSurname" value="Name surname" />
+		<text name="UserName" value="Потребителско име" />
+		<text name="Name" value="Име" />
+		<text name="Surname" value="Фамилно име" />
+		<text name="EmailAddress" value="Имейл адрес" />
+		<text name="Tenants" value="Наематели" />
+		<text name="SavedSuccessfully" value="Записан успешно" />
+		<text name="CreateNewTenant" value="Create new tenant" />
+		<text name="AdminEmailAddress" value="Admin email address" />
+		<text name="AdminPassword" value="Администраторска парола" />
+		<text name="Save" value="Спасявам" />
+		<text name="Cancel" value="Задрасквам" />
+		<text name="TenantName_Regex_Description" value="Името на наемателя трябва да бъде най-малко 2 chars, започва с буква и да продължи с буква, номер, тире или подчертаване." />
+		<text name="DefaultPasswordIs" value="Паролата по подразбиране е {0}" />
+		<text name="CanBeEmptyToLoginAsHost" value="Може да бъде празен, за да влезете като домакин." />
+		<text name="Register" value="Регистрирайте се." />
+		<text name="OrLoginWith" value="Или вход с" />
+		<text name="WaitingForActivationMessage" value="Профилът ви чака да бъде активиран от системния администратор." />
+		<text name="TenantSelection" value="Избор на наемател" />
+		<text name="TenantSelection_Detail" value="Моля, изберете един от следните наематели." />
+		<text name="Logout" value="Изход" />
+		<text name="RegisterFormUserNameInvalidMessage">Моля, не въвеждайте имейл адрес за потребителско име.</text>
+		<text name="DatabaseConnectionString" value="Низ за връзка към базата данни" />
+		<text name="Users" value="Потребители" />
+		<text name="IsActive" value="Е активен" />
+		<text name="FullName" value="Пълно име" />
+		<text name="CreateNewUser" value="Създаване на нов потребител" />
+		<text name="Yes" value="Да" />
+		<text name="No" value="Не" />
+		<text name="Optional" value="Факултативен" />
+		<text name="LeaveEmptyToSwitchToHost">Оставете празен, за да превключите към хоста</text>
+		<text name="CurrentTenant">Настоящ наемател</text>
+		<text name="NotSelected">Не е избрано</text>
+		<text name="Change">Променям</text>
+		<text name="ChangeTenant">Промяна на наемател</text>
+		<text name="MultiLevelMenu">Меню за няколко нива</text>
+		<text name="Back">Гръб</text>
+		<text name="SuccessfullyRegistered">Успешно регистрирани</text>
+		<text name="WaitingForEmailActivation">Вашият имейл адрес трябва да бъде активиран</text>
+		<text name="Roles">Роли</text>
+		<text name="DisplayName">Показвано име</text>
+		<text name="Edit">Редактирам</text>
+		<text name="Delete">Изтривам</text>
+		<text name="Open">Отворя</text>
+		<text name="CreateNewRole">Създаване на нова роля</text>
+		<text name="RoleName">Име на роля</text>
+		<text name="Actions">Действия</text>
+		<text name="CouldNotCompleteLoginOperation">Could not complete login operation. Please try again later.</text>
+		<text name="CouldNotValidateExternalUser">Could not validate external user</text>
+		<text name="EditRole">Редактиране на роля</text>
+		<text name="EditTenant">Редактиране на наемател</text>
+		<text name="EditUser">Редактиране на потребител</text>
+		<text name="TenantIdIsNotActive{0}">TenantId {0} is not active</text>
+		<text name="UnknownTenantId{0}">Unknown tenantId {0}</text>
+		<text name="ThisFieldIsRequired">Това поле е задължително</text>
+		<text name="PleaseWait">Моля, изчакайте</text>
+		<text name="Administration">Администрация</text>
+		<text name="ClearAll">Изчистване на всички</text>
+		<text name="ClearOthers">Изчистване на другите</text>
+		<text name="LabelOptions">Опции за етикети</text>
+		<text name="Permissions">Разрешения</text>
+		<text name="RoleDescription">Описание на ролите</text>
+		<text name="Refresh">Опреснявам</text>
+		<text name="Create">Създавам</text>
+		<text name="UserDetails">Подробности за потребителя</text>
+		<text name="UserRoles">Потребителски роли</text>
+		<text name="ConfirmPassword">ПотвърдетеПасслорд</text>
+		<text name="Version">Version</text>
+		<text name="On">на</text>
+		<text name="Off">Разстояние</text>
+		<text name="AreYouSureWantToDelete">Наистина ли искате да изтриете {0}?</text>
+		<text name="SuccessfullyDeleted">Успешно изтрит</text>
+		<text name="StartTyping">Кожи</text>
+		<text name="Skins">Skins</text>
+		<text name="Settings">Настройки</text>
+		<text name="Filter">Филтър</text>
+		<text name="CurrentPassword">Текуща парола</text>
+		<text name="NewPassword">Нова парола</text>
+		<text name="ConfirmNewPassword">Потвърждаване на нова парола</text>
+		<text name="PasswordsDoNotMatch">Паролите не съвпадат</text>
+		<text name="PasswordsMustBeAtLeast8CharactersContainLowercaseUppercaseNumber">Паролите трябва да са най-малко 8 знака, да съдържат малки букви, главни букви и номер</text>
+		<text name="UserDeleteWarningMessage">Потребителските {0} ще бъдат изтрити.</text>
+		<text name="RoleDeleteWarningMessage">Роля {0} ще бъде изтрита и непричислена от всички присвоени потребители.</text>
+		<text name="TenantDeleteWarningMessage">Наемател {0} ще бъде изтрит.</text>
+		<text name="SearchWithThreeDot">Търсене...</text>
+		<text name="PleaseEnterAtLeastNCharacter">Моля, въведете поне {0} знака</text>
+		<text name="PleaseEnterNoMoreThanNCharacter">Моля, въведете не повече от {0} знака</text>
+		<text name="InvalidEmailAddress">Невалиден имейл адрес</text>
+		<text name="InvalidPattern">Невалиден</text>
+		<text name="PairsDoNotMatch">Не съвпадайте</text>
+		<text name="All">Цял</text>
+		<text name="TotalRecordsCount">Общ брой записи</text>
+		<text name="Search">Търсене</text>
+		<text name="Clear">Ясен</text>
+		<text name="ResetPasswordStepOneInfo">1. Въведете паролата на администратора си</text>
+		<text name="ResetPasswordStepTwoInfo">2. Копирайте тази случайна парола, за да можете да я изпратите на потребителя</text>
+		<text name="UsersActivation">Активиране на потребителите</text>
+		<text name="Customers">Потребители</text>
+		<text name="Groups">Групи</text>
+		<text name="Sales">Продажби</text>
+		<text name="ImportEconomicData">Импортиране на икономически данни</text>
+		<text name="Calender">Календар</text>
+		<text name="RememberReport">Запомнете отчет</text>
+		<text name="CreateActivity">Създаване на дейност</text>
+		<text name="CreateGroup">Създаване на група</text>
+		<text name="CustomerNo">Клиент No</text>
+		<text name="Telephone">Телефон</text>
+		<text name="Town/City">Град/Град</text>
+		<text name="Country">Страна</text>
+		<text name="View">Изглед</text>
+		<text name="Calendar View">Изглед на календар</text>
+		<text name="CalendarView">Изглед на списък</text>
+		<text name="CustomerDetails">Подробности за клиента</text>
+		<text name="Activities">Дейности</text>
+		<text name="Activity">Активност</text>
+		<text name="PhoneCallNote">Бележка за телефонно обаждане</text>
+		<text name="CreatePhoneCallActivitySuccessfully">Създаване на активност на телефонния разговор успешно</text>
+		<text name="Address">Адрес</text>
+		<text name="UserType">Тип потребител</text>
+		<text name="PostCode">Пощенски код</text>
+		<text name="Website">Уебсайт</text>
+		<text name="Currency">Валута</text>
+		<text name="ActivityName">Име на дейност</text>
+		<text name="ActivityType">Вид дейност</text>
+		<text name="ActivityDate">Дата на дейност</text>
+		<text name="FollowUpType">Проследяване на типа</text>
+		<text name="FollowUpDate">Следване на дата</text>
+		<text name="Employee">Служител</text>
+		<text name="Date">Дата</text>
+		<text name="IsFellowUp">Е колега нагоре</text>
+		<text name="Id">ИД</text>
+		<text name="Invoices">Фактури</text>
+		<text name="InvoiceNo">Фактура No</text>
+		<text name="InvoiceDate">Фактура Дата</text>
+		<text name="DueDate">Дата на падеж</text>
+		<text name="Amount">Сума</text>
+		<text name="SerialNumber">СериенНомер</text>
+		<text name="InvoiceDetails">Подробни данни за фактура</text>
+		<text name="Update">Актуализирам</text>
+		<text name="Comment">Коментирам</text>
+		<text name="UpdateSuccessfully">Актуализирай успешно</text>
+		<text name="InvoiceLines">Редове от фактури</text>
+		<text name="LineNo">Ред No</text>
+		<text name="ProductName">Име на продукт</text>
+		<text name="ProductNumber">Номер на продукта</text>
+		<text name="Quantity">Количество</text>
+		<text name="Details">Подробности</text>
+		<text name="EmployeeRememberReport">Отчет за запомняне на служители</text>
+		<text name="Tasks">Задачи</text>
+		<text name="Invites">Кани</text>
+		<text name="TaskName">Име на задача</text>
+		<text name="CreateTask">Създаване на задача</text>
+		<text name="Title">Заглавие</text>
+		<text name="Description">Описание</text>
+		<text name="ActivityInfo">Информация за дейността</text>
+		<text name="SetStatus">Задаване на състояние</text>
+		<text name="Comming">Комбиниране</text>
+		<text name="NotComming">Не коминиране</text>
+		<text name="NotAnswer">Not Answer</text>
+		<text name="UserStatus">Състояние на потребителя</text>
+		<text name="Status">Статус</text>
+		<text name="AddComment">Добавяне на коментар</text>
+		<text name="Activies">Активи</text>
+		<text name="CreateSuccessfully">Създаване успешно</text>
+		<text name="SMSNote">SMS бележка</text>
+		<text name="EmailNote">Бележка по имейл</text>
+		<text name="Customer">Клиент</text>
+		<text name="ImportData">Импортиране на данни</text>
+
+		<text name="StartedTime">Стартирано време</text>
+		<text name="ActivityKind">Вид дейност</text>
+		<text name="ListView">Изглед на списък</text>
+		<text name="Sync">Синхронизиране</text>
+		
+		
+	    
+	</texts>
+</localizationDictionary>

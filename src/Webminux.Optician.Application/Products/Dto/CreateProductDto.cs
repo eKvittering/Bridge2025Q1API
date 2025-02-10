@@ -1,0 +1,114 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Webminux.Optician.Products.Dto
+{
+    /// <summary>
+    /// ProductDto
+    /// </summary>
+    public class CreateProductDto
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ProductNumber { get; set; }
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Description
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Product Group Number
+        /// </summary>
+        public int ProductGroupNumber { get; set; }
+
+
+
+        /// <summary>
+        /// SalesPrice
+        /// </summary>
+        public double SalesPrice { get; set; }
+
+        /// <summary>
+        /// CostPrice
+        /// </summary>
+        public double CostPrice { get; set; }
+
+        /// <summary>
+        /// Unit
+        /// </summary>
+        public double Unit { get; set; }
+
+        /// <summary>
+        /// Barcode
+        /// </summary>
+        public string Barcode { get; set; }
+
+        /// <summary>
+        /// Access
+        /// </summary>
+        public string Access { get; set; }
+
+        /// <summary>
+        /// Rec price
+        /// </summary>
+        public string Recprice { get; set; }
+
+        /// <summary>
+        /// Category
+        /// </summary>
+        public string Category { get; set; }
+
+        /// <summary>
+        /// Location
+        /// </summary>
+        public string Location { get; set; }
+
+        /// <summary>
+        /// GrossWeight
+        /// </summary>
+        public string GrossWeight { get; set; }
+
+        /// <summary>
+        /// Volume
+        /// </summary>
+        public string Volume { get; set; }
+
+        /// <summary>
+        /// ProductDiscountGroup
+        /// </summary>
+
+        public string ProductDiscountGroup { get; set; }
+
+        /// <summary>
+        ///  minmum stock 
+        /// </summary>
+        public int MinStock { get; set; }
+
+        /// <summary>
+        ///  minmum order 
+        /// </summary>
+        public int MinOrder { get; set; }
+
+        /// <summary>
+        /// RecCostPrice
+        /// </summary>
+        public double RecCostPrice { get; set; }
+
+        /// <summary>
+        ///  in stock
+        /// </summary>
+        public int InStock { get; set; }
+
+
+    }
+}

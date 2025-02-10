@@ -1,0 +1,47 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<localizationDictionary culture="fr">
+	<texts>
+		<text name="HomePage" value="Accueil" />
+		<text name="About" value="À propos" />
+		<text name="WelcomeMessage" value="Bienvenue !" />
+
+		<text name="FormIsNotValidMessage" value="Formulaire invalide." />
+		<text name="TenantNameCanNotBeEmpty" value="Nom requis." />
+
+		<text name="InvalidUserNameOrPassword" value="Identifiant ou mot de passe incorrect." />
+		<text name="ThereIsNoTenantDefinedWithName{0}" value="Client {0} introuvable." />
+		<text name="TenantIsNotActive" value="Client {0} inactif." />
+		<text name="UserIsNotActiveAndCanNotLogin" value="Utilisateur {0} inactif." />
+		<text name="PleaseEnterLoginInformation" value="Entrez vos informations." />
+		<text name="TenancyName" value="Nom client" />
+		<text name="UserNameOrEmail" value="Identifiant ou email" />
+		<text name="Password" value="Mot de passe" />
+		<text name="RememberMe" value="Se souvenir" />
+		<text name="LogIn" value="Connexion" />
+
+		<text name="LoginFailed" value="Connexion échouée !" />
+
+		<text name="Surname" value="Nom" />
+		<text name="UserName" value="Utilisateur" />
+		<text name="Name" value="Prénom" />
+		<text name="EmailAddress" value="Email" />
+
+		<text name="Tenants" value="Clients" />
+		<text name="SavedSuccessfully" value="Enregistré" />
+		<text name="CreateNewTenant" value="Nouveau client" />
+		<text name="AdminEmailAddress" value="Email admin" />
+		<text name="Save" value="Sauvegarder" />
+		<text name="Cancel" value="Annuler" />
+		<text name="TenantName_Regex_Description" value="Nom : 2+ lettres/chiffres." />
+		<text name="DefaultPasswordIs" value="Mot de passe par défaut : {0}" />
+		<text name="CanBeEmptyToLoginAsHost" value="Laisser vide pour host." />
+		<text name="Register" value="S'inscrire" />
+		<text name="OrLoginWith" value="Ou avec" />
+		<text name="WaitingForActivationMessage" value="Compte en attente d'activation." />
+		<text name="TenantSelection" value="Choix du client" />
+		<text name="TenantSelection_Detail" value="Choisissez un client." />
+		<text name="Logout" value="Déconnexion" />
+		<text name="SearchWithThreeDot">Rechercher...</text>
+	</texts>
+</localizationDictionary>
+

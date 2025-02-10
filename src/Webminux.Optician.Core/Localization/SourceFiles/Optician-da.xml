@@ -1,0 +1,138 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<localizationDictionary culture="da">
+	<texts>
+		<text name="HomePage" value="Hjem" />
+		<text name="About" value="Om" />
+		<text name="WelcomeMessage" value="Velkommen" />
+		<text name="FormIsNotValidMessage" value="Formular ugyldig" />
+		<text name="TenantNameCanNotBeEmpty" value="Tenant kræves" />
+		<text name="InvalidUserNameOrPassword" value="Bruger/kodeord fejl" />
+		<text name="ThereIsNoTenantDefinedWithName{0}" value="Tenant findes ikke" />
+		<text name="TenantIsNotActive" value="Tenant inaktiv" />
+		<text name="UserIsNotActiveAndCanNotLogin" value="Bruger inaktiv" />
+		<text name="UserEmailIsNotConfirmedAndCanNotLogin">Bruger email er ikke aktiveret</text>
+		<text name="UserLockedOutMessage">Bruger lukket ude besked</text>
+		<text name="PleaseEnterLoginInformation" value="Indtast login" />
+		<text name="TenancyName" value="Tenantnavn" />
+		<text name="UserNameOrEmail" value="Brugernavn/Email" />
+		<text name="Password" value="Kode" />
+		<text name="ResetPassword" value="Nulstil kode" />
+		<text name="UpdatePassword" value="Opdatér kode" />
+		<text name="RememberMe" value="Husk mig" />
+		<text name="LogIn" value="Log ind" />
+		<text name="LoginFailed" value="Login fejl!" />
+		<text name="NameSurname" value="Efternavn" />
+		<text name="UserName" value="Brugernavn" />
+		<text name="Name" value="Navn" />
+		<text name="Surname" value="Efternavn" />
+		<text name="EmailAddress" value="Email" />
+		<text name="Tenants" value="Kunder" />
+		<text name="SavedSuccessfully" value="Gemt" />
+		<text name="CreateNewTenant" value="Ny tenant" />
+		<text name="AdminEmailAddress" value="Admin Email" />
+		<text name="AdminPassword" value="Admin kode" />
+		<text name="Save" value="Gem" />
+		<text name="Cancel" value="Fortryd" />
+		<text name="TenantName_Regex_Description" value="Tenant krav" />
+		<text name="DefaultPasswordIs" value="Standard kode: {0}" />
+		<text name="CanBeEmptyToLoginAsHost" value="Lad tomt for host" />
+		<text name="Register" value="Registrer" />
+		<text name="OrLoginWith" value="eller log ind med" />
+		<text name="WaitingForActivationMessage" value="Venter på aktivering" />
+		<text name="TenantSelection" value="Vælg tenant" />
+		<text name="TenantSelection_Detail" value="Vælg detaljer" />
+		<text name="Logout" value="Log ud" />
+		<text name="RegisterFormUserName Invalid Message">Registrer form ukendt fejl.</text>
+		<text name="DatabaseConnectionString" value="DatabaseConnectionString" />
+		<text name="Users" value="Brugere" />
+		<text name="IsActive" value="Aktiv" />
+		<text name="FullName" value="Fuldt navn" />
+		<text name="CreateNewUser" value="Ny bruger" />
+		<text name="Yes" value="Ja" />
+		<text name="No" value="Nej" />
+		<text name="Optional" value="Valgfrit" />
+		<text name="LeaveEmptyToSwitchToHost">Behold tom for at skifte til host</text>
+		<text name="CurrentTenant">Nuværende tenant</text>
+		<text name="NotSelected">Ikke valgt</text>
+		<text name="Change">Veksle</text>
+		<text name="ChangeTenant">Skift tenant</text>
+		<text name="MultiLevelMenu">MultiNiveauMenu</text>
+		<text name="Back">Tilbage</text>
+		<text name="SuccessfullyRegistered">Succesfuldt gemt</text>
+		<text name="WaitingForEmailActivation">Afventer Email aktivering</text>
+		<text name="Roles">Roller</text>
+		<text name="DisplayName">Vist navn</text>
+		<text name="Edit">Rediger</text>
+		<text name="Delete">Slet</text>
+		<text name="CreateNewRole">Opret ny rolle</text>
+		<text name="RoleName">Rollenavn</text>
+		<text name="Actions">Aktion</text>
+		<text name="CouldNotCompleteLoginOperation">Kunne ikke gennemføre login.</text>
+		<text name="CouldNotValidateExternalUser">Kunne ikke validere slutbruger</text>
+		<text name="EditRole">Rediger rolle</text>
+		<text name="EditTenant">Rediger tenant</text>
+		<text name="EditUser">Rediger bruger</text>
+		<text name="TenantIdIsNotActive{0}">Tenant er ikke aktiv</text>
+		<text name="UnknownTenantId{0}">Tenant {0} ukendt</text>
+		<text name="ThisFieldIsRequired">dette felt er krævet</text>
+		<text name="PleaseWait">Vent venligst...</text>
+		<text name="Administration">Administration</text>
+		<text name="ClearAll">Slet alt</text>
+		<text name="ClearOthers">Slet andre</text>
+		<text name="LabelOptions">Felt muligheder</text>
+		<text name="Permissions">Rettigheder</text>
+		<text name="RoleDescription">Rollebeskrivelse</text>
+		<text name="Refresh">Opdater</text>
+		<text name="Create">Opret</text>
+		<text name="UserDetails">Bruger detaljer</text>
+		<text name="UserRoles">Brugerrolle</text>
+		<text name="ConfirmPassword">Bekræft kodeord</text>
+		<text name="Version">Version</text>
+		<text name="On">Aktiv</text>
+		<text name="Off">Inaktiv</text>
+		<text name="AreYouSureWantToDelete">Er du sikker på du vil slette {0}?</text>
+		<text name="SuccessfullyDeleted">Succesfuld sletning</text>
+		<text name="StartTyping">Start med at skrive</text>
+		<text name="Skins">Skins</text>
+		<text name="Settings">Indstillinger</text>
+		<text name="Filter">Filter</text>
+		<text name="CurrentPassword">Nuværende kodeord</text>
+		<text name="NewPassword">Nyt kodeord</text>
+		<text name="ConfirmNewPassword">Bekræft nyt kodeord</text>
+		<text name="PasswordsDoNotMatch">Kodeord forkert</text>
+		<text name="PasswordsMustBeAtLeast8CharactersContainLowercaseUppercaseNumber">Kodeord skal være mindst 8 karakterer og både store og små bogstaver.</text>
+		<text name="UserDeleteWarningMessage">Brugere {0} slette advarsel.</text>
+		<text name="RoleDeleteWarningMessage">Rolle {0} slette advarsel.</text>
+		<text name="TenantDeleteWarningMessage">Advarsel om at tenant {0} slettes.</text>
+		<text name="SearchWithThreeDot">Søg...</text>
+		<text name="PleaseEnterAtLeastNCharacter">Indtast mindst {0} karakterer.</text>
+		<text name="PleaseEnterNoMoreThanNCharacter">Indtast mere end {0} karakterer.</text>
+		<text name="InvalidEmailAddress">Forkert Email adresse.</text>
+		<text name="InvalidPattern">Forkert mønster</text>
+		<text name="PairsDoNotMatch">Ingen matcher</text>
+		<text name="All">Ialt</text>
+		<text name="TotalRecordsCount">Antal rækker: {0}</text>
+		<text name="Search">Søg</text>
+		<text name="Clear">Ryd</text>
+		<text name="ResetPasswordStepOneInfo">1. step ved sletning af kodeord</text>
+		<text name="ResetPasswordStepTwoInfo">2. step ved sletning af kodeord</text>
+		<text name="Customers">Kunder</text>
+		<text name="Activities">Aktiviteter</text>
+		<text name="RememberReport">Reminder rapport</text>
+		<text name="Calender">Kalender</text>
+		<text name="UserType">Brugertype</text>
+		<text name="Username">Brugernavn</text>
+		<text name="Fullname">Fuldt navn</text>
+		<text name="Emailaddress">E-mailadresse</text>
+		<text name="Isactive">Er aktiv</text>
+		<text name="ViewActivities">Vis aktiviteter</text>
+		<text name="Employee">Vis Ansat</text>
+		<text name="Date">Dato</text>
+		<text name="Type">Slags</text>
+		<text name="Kind">Slags</text>
+		<text name="FollowUpType">Opfølgningstype</text>
+		<text name="FollowUpDate">Opfølgningsdato</text>
+
+	</texts>
+</localizationDictionary>
+

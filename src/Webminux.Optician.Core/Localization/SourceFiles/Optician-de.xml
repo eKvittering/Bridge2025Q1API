@@ -1,0 +1,48 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<localizationDictionary culture="de">
+	<texts>
+		<text name="HomePage" value="Startseite" />
+		<text name="About" value="Über" />
+		<text name="WelcomeMessage" value="Willkommen bei Optician!" />
+
+		<text name="FormIsNotValidMessage" value="Formular ungültig." />
+		<text name="TenantNameCanNotBeEmpty" value="Der Mandantenname darf nicht leer sein." />
+
+		<text name="InvalidUserNameOrPassword" value="Benutzername oder Passwort ungültig." />
+		<text name="ThereIsNoTenantDefinedWithName{0}" value="Es gibt keinen mandaten mit dem namen definiert." />
+		<text name="TenantIsNotActive" value="Mandant ist inaktiv." />
+		<text name="UserIsNotActiveAndCanNotLogin" value="Benutzer ist inaktiv und kann sich nicht anmelden." />
+		<text name="PleaseEnterLoginInformation" value="Bitte geben die Anmeldeinformationen ein." />
+		<text name="TenancyName" value="Mandantenname" />
+		<text name="UserNameOrEmail" value="Benutzername oder Email" />
+		<text name="Password" value="Passwort" />
+		<text name="RememberMe" value="Erinnere dich an mich" />
+		<text name="LogIn" value="Anmelden" />
+
+		<text name="LoginFailed" value="Anmeldung fehlgeschlagen!" />
+
+		<text name="NameSurname" value=" Vorname Nachname" />
+		<text name="UserName" value="Benutzername" />
+		<text name="Name" value="Vorname" />
+		<text name="Surname" value="Nachname" />
+		<text name="EmailAddress" value="Emailadresse" />
+
+		<text name="Tenants" value="Mandanten" />
+		<text name="SavedSuccessfully" value="Erfolgreich gespeichert" />
+		<text name="CreateNewTenant" value="Neuen Mandanten erstellen" />
+		<text name="AdminEmailAddress" value="Admin-Emailadresse" />
+		<text name="Save" value="Speichern" />
+		<text name="Cancel" value="Abbrechen" />
+		<text name="TenantName_Regex_Description" value="Beschreibung des Mandantennamens-Regex." />
+		<text name="DefaultPasswordIs" value="Standardpasswort ist {0}" />
+		<text name="CanBeEmptyToLoginAsHost" value="Leer lassen für Host-Login." />
+		<text name="Register" value="Registrieren" />
+		<text name="OrLoginWith" value="Oder anmelden mit" />
+		<text name="WaitingForActivationMessage" value="Konto wartet auf Aktivierung." />
+		<text name="TenantSelection" value="Mandantenauswahl" />
+		<text name="TenantSelection_Detail" value="Bitte Mandanten auswählen." />
+		<text name="Logout" value="Abmelden" />
+		<text name="SearchWithThreeDot">Rechercher...</text>
+	</texts>
+</localizationDictionary>
+
