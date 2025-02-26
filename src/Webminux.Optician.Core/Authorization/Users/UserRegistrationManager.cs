@@ -37,7 +37,7 @@ namespace Webminux.Optician.Authorization.Users
             AbpSession = NullAbpSession.Instance;
         }
 
-        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed)
+        public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed , int? userTypeId)
         {
             CheckForTenant();
 
@@ -45,8 +45,9 @@ namespace Webminux.Optician.Authorization.Users
 
             var user = new User
             {
-                TenantId = tenant.Id,
+                TenantId = tenant != null ? tenant.Id : null,
                 Name = name,
+                UserTypeId = (int)userTypeId,
                 Surname = surname,
                 EmailAddress = emailAddress,
                 IsActive = true,
@@ -56,15 +57,26 @@ namespace Webminux.Optician.Authorization.Users
             };
 
             user.SetNormalizedNames();
-           
-            foreach (var defaultRole in await _roleManager.Roles.Where(r => r.IsDefault).ToListAsync())
+            if(tenant != null)
             {
-                user.Roles.Add(new UserRole(tenant.Id, user.Id, defaultRole.Id));
+                foreach (var defaultRole in await _roleManager.Roles.Where(r => r.IsDefault).ToListAsync())
+                {
+                    user.Roles.Add(new UserRole(tenant.Id, user.Id, defaultRole.Id));
+                }               
             }
+            int? tenatId = tenant != null ? tenant.Id : null;
+            await _userManager.InitializeOptionsAsync(tenatId);
 
-            await _userManager.InitializeOptionsAsync(tenant.Id);
 
-            CheckErrors(await _userManager.CreateAsync(user, plainPassword));
+            try
+            {
+                var result = await _userManager.CreateAsync(user, plainPassword);
+                CheckErrors(result);
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException($"User registration failed: {ex.Message}", ex);
+            }
             await CurrentUnitOfWork.SaveChangesAsync();
 
             return user;
@@ -74,7 +86,7 @@ namespace Webminux.Optician.Authorization.Users
         {
             if (!AbpSession.TenantId.HasValue)
             {
-                throw new InvalidOperationException("Can not register host users!");
+                return;
             }
         }
 

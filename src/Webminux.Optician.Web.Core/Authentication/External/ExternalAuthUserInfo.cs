@@ -11,5 +11,6 @@
         public string Surname { get; set; }
 
         public string Provider { get; set; }
+        public int? UserTypeId { get; set; } = null;
     }
 }

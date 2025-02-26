@@ -30,6 +30,7 @@ namespace Webminux.Optician.Authorization.Accounts.Dto
         [StringLength(AbpUserBase.MaxPlainPasswordLength)]
         [DisableAuditing]
         public string Password { get; set; }
+        public int UserTypeId { get; set; }
 
         [DisableAuditing]
         public string CaptchaResponse { get; set; }

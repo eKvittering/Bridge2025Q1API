@@ -144,7 +144,8 @@ namespace Webminux.Optician.Controllers
                 externalUser.EmailAddress,
                 externalUser.EmailAddress,
                 Authorization.Users.User.CreateRandomPassword(),
-                true
+                true,
+                externalUser.UserTypeId
             );
 
             user.Logins = new List<UserLogin>
