@@ -39,7 +39,7 @@ namespace Webminux.Optician.Authorization.Users
 
         public async Task<User> RegisterAsync(string name, string surname, string emailAddress, string userName, string plainPassword, bool isEmailConfirmed , int? userTypeId)
         {
-            CheckForTenant();
+            //CheckForTenant();
 
             var tenant = await GetActiveTenantAsync();
 
@@ -82,22 +82,12 @@ namespace Webminux.Optician.Authorization.Users
             return user;
         }
 
-        private void CheckForTenant()
-        {
-            if (!AbpSession.TenantId.HasValue)
-            {
-                return;
-            }
-        }
-
         private async Task<Tenant> GetActiveTenantAsync()
-        {
-            if (!AbpSession.TenantId.HasValue)
-            {
-                return null;
-            }
+        {       
+            // set default tenant id if not exists
+            var tenantId = AbpSession.TenantId ?? 1;
 
-            return await GetActiveTenantAsync(AbpSession.TenantId.Value);
+            return await GetActiveTenantAsync(tenantId);
         }
 
         private async Task<Tenant> GetActiveTenantAsync(int tenantId)
