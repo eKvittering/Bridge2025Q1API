@@ -195,7 +195,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               {
                                   Id = activityInvite.First().Activity.Id,
                                   Name = activityInvite.First().Activity.Name,
-                                  CustomerId = activityInvite.First().Activity.CustomerId,
+                                  //CustomerId = activityInvite.First().Activity.CustomerId,
                                   ActivityTypeId = activityInvite.First().Activity.ActivityTypeId,
                                   ActivityArtId = activityInvite.First().Activity.ActivityArtId,
                                   Date = activityInvite.First().Activity.Date,
@@ -208,12 +208,12 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               },
                               CreationTime = activityInvite.First().CreationTime,
                               CreatorUserId = activityInvite.First().CreatorUserId,
-                              Responses = activityInvite.Select(x => new CustomerResponseDto
-                              {
-                                  Id = x.CustomerId,
-                                  Name = x.Customer.User.FullName,
-                                  Response = (int)x.Response
-                              }).ToList()
+                              //Responses = activityInvite.Select(x => new CustomerResponseDto
+                              //{
+                              //    Id = x.CustomerId.Value,
+                              //    Name = x.Customer.User.FullName,
+                              //    Response = (int)x.Response
+                              //}).ToList()
                           };
         return selectQuery;
     }
@@ -247,7 +247,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               CreatorUserId = groupInvite.First().CreatorUserId,
                               Responses = groupInvite.Select(x => new CustomerResponseDto
                               {
-                                  Id = x.CustomerId,
+                                  Id = x.CustomerId.Value,
                                   Name = x.Customer.User.FullName,
                                   Response = (int)x.Response
                               }).ToList()
@@ -261,7 +261,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                           select new InviteDto
                           {
                               Id = invite.Id,
-                              CustomerId = invite.CustomerId,
+                              CustomerId = invite.CustomerId.Value,
                               ActivityId = invite.ActivityId,
                               Activity = new ActivityDto
                               {
@@ -282,7 +282,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               CreatorUserId = invite.CreatorUserId,
                               Responses = new List<CustomerResponseDto>{ new CustomerResponseDto
                               {
-                                  Id = invite.CustomerId,
+                                  Id = invite.CustomerId.Value,
                                   Name = invite.Customer.User.FullName,
                                   Response = (int)invite.Response
                               } }

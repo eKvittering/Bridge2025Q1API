@@ -91,8 +91,9 @@ namespace Webminux.Optician.Activities
 
         private async Task CreateInviteAsync(CreateActivityDto input, int tenantId, Activity activity)
         {
-            Invite invite = Invite.Create(tenantId, input.CustomerTableId, null, activity.Id);
-            await _inviteManager.CreateAsync(invite);
+            Invite invite = Invite.Create(tenantId, null, activity.GroupId, activity.Id);
+            if (invite.CustomerId == 0)
+                invite.CustomerId = null; await _inviteManager.CreateAsync(invite);
         }
         #endregion
 

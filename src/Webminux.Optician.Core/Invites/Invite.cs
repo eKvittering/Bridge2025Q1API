@@ -11,7 +11,7 @@ public class Invite : CreationAuditedEntity, IMustHaveTenant
 
 
     [ForeignKey(nameof(Customer))]
-    public virtual int CustomerId { get; set; }
+    public virtual int? CustomerId { get; set; }
     public virtual Customer Customer { get; set; }
 
 
@@ -28,7 +28,7 @@ public class Invite : CreationAuditedEntity, IMustHaveTenant
 
     protected Invite() { }
 
-    public static Invite Create(int tenantId, int customerId, int? groupId, int activityId)
+    public static Invite Create(int tenantId, int? customerId, int? groupId, int activityId)
     {
         return new Invite
         {
