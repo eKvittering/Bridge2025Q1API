@@ -24,6 +24,6 @@ namespace Webminux.Optician.Invoices.dtos
         /// <summary>
         /// Id of invited customer
         /// </summary>
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
     }
 }
