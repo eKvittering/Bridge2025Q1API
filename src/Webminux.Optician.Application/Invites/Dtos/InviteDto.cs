@@ -32,8 +32,8 @@ public class InviteDto : CreationAuditedEntityDto
     public virtual int ActivityId { get; set; }
 
     /// <summary>
-    /// Id  of invited customer
+    /// Id  of invited Users
     /// </summary>
-    public virtual int CustomerId { get; set; }
+    public virtual long CustomerId { get; set; }
 
 }

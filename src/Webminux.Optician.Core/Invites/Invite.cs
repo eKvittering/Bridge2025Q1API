@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Abp.Domain.Entities;
 using Abp.Domain.Entities.Auditing;
 using Webminux.Optician;
+using Webminux.Optician.Authorization.Users;
 using Webminux.Optician.Core.Customers;
 using static Webminux.Optician.OpticianConsts;
 
@@ -10,9 +11,9 @@ public class Invite : CreationAuditedEntity, IMustHaveTenant
     public virtual int TenantId { get; set; }
 
 
-    [ForeignKey(nameof(Customer))]
-    public virtual int? CustomerId { get; set; }
-    public virtual Customer Customer { get; set; }
+    [ForeignKey(nameof(User))]
+    public virtual long? UserId { get; set; }
+    public virtual User User { get; set; }
 
 
     [ForeignKey(nameof(Group))]
@@ -28,12 +29,12 @@ public class Invite : CreationAuditedEntity, IMustHaveTenant
 
     protected Invite() { }
 
-    public static Invite Create(int tenantId, int? customerId, int? groupId, int activityId)
+    public static Invite Create(int tenantId, int? userId, int? groupId, int activityId)
     {
         return new Invite
         {
             TenantId = tenantId,
-            CustomerId = customerId,
+            UserId = userId,
             GroupId = groupId,
             ActivityId = activityId,
             Response = InviteResponse.Pending

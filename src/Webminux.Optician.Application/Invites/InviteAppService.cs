@@ -97,7 +97,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
     public async Task<InviteDto> GetCustomerInviteAsync(GetInviteInputDto input)
     {
         var query = _inviteManager.GetAll();
-        query = query.Where(i => i.ActivityId == input.ActivityId && i.CustomerId == input.CustomerId);
+        query = query.Where(i => i.ActivityId == input.ActivityId && i.UserId == input.CustomerId);
         var selectQuery = GetSelectQueryForCustomerInvite(query);
         return await selectQuery.FirstOrDefaultAsync();
     }
@@ -129,7 +129,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
     {
 
         var query = _inviteManager.GetAll();
-        query = query.Where(x => x.CustomerId == input.Id);
+        query = query.Where(x => x.UserId == input.Id);
         var selectQuery = GetSelectQueryForCustomerInvite(query);
         var invites = await selectQuery.ToListAsync();
 
@@ -151,7 +151,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
     private static IQueryable<Invite> ApplyFilters(PagedInviteResultRequestDto input, IQueryable<Invite> query)
     {
         if (input.CustomerId.HasValue)
-            query = query.Where(x => x.CustomerId == input.CustomerId.Value);
+            query = query.Where(x => x.UserId == input.CustomerId.Value);
         if (string.IsNullOrWhiteSpace(input.Keyword) == false)
             query = query.Where(x => x.Activity.Name.Contains(input.Keyword));
         return query;
@@ -247,8 +247,8 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               CreatorUserId = groupInvite.First().CreatorUserId,
                               Responses = groupInvite.Select(x => new CustomerResponseDto
                               {
-                                  Id = x.CustomerId.Value,
-                                  Name = x.Customer.User.FullName,
+                                  Id = x.UserId.Value,
+                                  Name = x.User.FullName,
                                   Response = (int)x.Response
                               }).ToList()
                           };
@@ -261,7 +261,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                           select new InviteDto
                           {
                               Id = invite.Id,
-                              CustomerId = invite.CustomerId.Value,
+                              CustomerId = invite.UserId.Value,
                               ActivityId = invite.ActivityId,
                               Activity = new ActivityDto
                               {
@@ -282,8 +282,8 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               CreatorUserId = invite.CreatorUserId,
                               Responses = new List<CustomerResponseDto>{ new CustomerResponseDto
                               {
-                                  Id = invite.CustomerId.Value,
-                                  Name = invite.Customer.User.FullName,
+                                  Id = invite.UserId.Value,
+                                  Name = invite.User.FullName,
                                   Response = (int)invite.Response
                               } }
                           };

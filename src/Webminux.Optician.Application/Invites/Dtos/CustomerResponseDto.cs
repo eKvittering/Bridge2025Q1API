@@ -3,11 +3,12 @@ using Abp.Application.Services.Dto;
 ///<summery>
 /// Dto for Customer Response.
 ///</summery>
-public class CustomerResponseDto: EntityDto
+public class CustomerResponseDto
 {
     ///<summery>
     /// Gets or sets the Customer Name
     ///</summery>
+    public long Id { get; set; }
     public string Name { get; set; }
     
     ///<summery>

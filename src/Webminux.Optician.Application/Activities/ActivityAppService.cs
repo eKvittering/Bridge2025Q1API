@@ -38,6 +38,8 @@ namespace Webminux.Optician.Activities
         private readonly IRepository<Customer> _customerRepository;
         private readonly IRepository<Ticket> _ticketRepository;
         private readonly IRepository<ActivityResponsible> _activityResponsibleRepository;
+        private readonly IRepository<EmployeeGroup> _employeeGroupRepository;
+
 
         /// <summary>
         /// Constructor
@@ -52,7 +54,8 @@ namespace Webminux.Optician.Activities
             IRepository<BookingActivityType> bookingActivityTypeRepository,
             IRepository<Customer> customerRepository,
             IRepository<Ticket> ticketRepository,
-            IRepository<ActivityResponsible> activityResponsibleRepository
+            IRepository<ActivityResponsible> activityResponsibleRepository,
+            IRepository<EmployeeGroup> employeeGroupRepository
             )
         {
             _activityManager = activityManager;
@@ -65,6 +68,7 @@ namespace Webminux.Optician.Activities
             _customerRepository = customerRepository;
             _ticketRepository = ticketRepository;
             _activityResponsibleRepository = activityResponsibleRepository;
+            _employeeGroupRepository = employeeGroupRepository;
         }
 
         #region Create
@@ -73,14 +77,24 @@ namespace Webminux.Optician.Activities
         /// </summary>
         public async Task CreateAsync(CreateActivityDto input)
         {
-            int tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
-            Activity activity = GetActivityModel(input, tenantId);
-            _ = await _activityManager.CreateAsync(activity);
-            await UnitOfWorkManager.Current.SaveChangesAsync();
-
-            if (IsInvitedActivity(input))
+            try
             {
-                await CreateInviteAsync(input, tenantId, activity);
+                int tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
+                Activity activity = GetActivityModel(input, tenantId);
+                _ = await _activityManager.CreateAsync(activity);
+                await UnitOfWorkManager.Current.SaveChangesAsync();
+
+                if (IsInvitedActivity(input))
+                {
+                    await CreateInviteAsync(input, tenantId, activity);
+                }
+
+
+            }
+            catch (Exception e)
+            {
+
+                throw e;
             }
         }
 
@@ -91,9 +105,15 @@ namespace Webminux.Optician.Activities
 
         private async Task CreateInviteAsync(CreateActivityDto input, int tenantId, Activity activity)
         {
-            Invite invite = Invite.Create(tenantId, null, activity.GroupId, activity.Id);
-            if (invite.CustomerId == 0)
-                invite.CustomerId = null; await _inviteManager.CreateAsync(invite);
+            var employees = _employeeGroupRepository.GetAll().Where(x=>x.GroupId == activity.GroupId).Distinct();
+
+            foreach (var item in employees)
+            {
+                Invite invite = Invite.Create(tenantId, (int)item.EmployeeId, activity.GroupId, activity.Id);
+                if (invite.UserId == 0)
+                    invite.UserId = null;
+                await _inviteManager.CreateAsync(invite);
+            }
         }
         #endregion
 
