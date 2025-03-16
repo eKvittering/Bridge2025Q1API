@@ -208,12 +208,12 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               },
                               CreationTime = activityInvite.First().CreationTime,
                               CreatorUserId = activityInvite.First().CreatorUserId,
-                              //Responses = activityInvite.Select(x => new CustomerResponseDto
-                              //{
-                              //    Id = x.CustomerId.Value,
-                              //    Name = x.Customer.User.FullName,
-                              //    Response = (int)x.Response
-                              //}).ToList()
+                              Responses = activityInvite.Select(x => new CustomerResponseDto
+                              {
+                                  Id = x.UserId.Value,
+                                  Name = x.User.FullName,
+                                  Response = (int)x.Response
+                              }).ToList()
                           };
         return selectQuery;
     }
