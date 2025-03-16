@@ -60,6 +60,7 @@ namespace Webminux.Optician.Users
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<UserDto> GetByUserId(long userId);
+    
 
     }
 }

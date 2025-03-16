@@ -289,7 +289,11 @@ namespace Webminux.Optician.Users
         /// </summary>
         protected override async Task<User> GetEntityByIdAsync(long id)
         {
-            var user = await Repository.GetAllIncluding(x => x.Roles).FirstOrDefaultAsync(x => x.Id == id);
+            //var user = await Repository.GetAllIncluding(x => x.Roles).FirstOrDefaultAsync(x => x.Id == id);
+            var user = await Repository
+       .GetAllIncluding(x => x.Roles)
+       .IgnoreQueryFilters() // Bypasses global tenant filter
+       .FirstOrDefaultAsync(x => x.Id == id);
 
             if (user == null)
             {
@@ -460,7 +464,7 @@ namespace Webminux.Optician.Users
         {
             try
             {
-                var user = await Repository.FirstOrDefaultAsync(userId);
+                var user = await  Repository.GetAllListAsync(u => u.Id == userId && u.TenantId == 1);
 
                 var data = ObjectMapper.Map<UserDto>(user);
 
@@ -472,6 +476,8 @@ namespace Webminux.Optician.Users
                 throw;
             }
         }
+       
+
     }
 }
 
