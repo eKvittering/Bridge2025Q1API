@@ -129,6 +129,7 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
     {
 
         var query = _inviteManager.GetAll();
+
         query = query.Where(x => x.UserId == input.Id);
         var selectQuery = GetSelectQueryForCustomerInvite(query);
         var invites = await selectQuery.ToListAsync();
@@ -141,7 +142,8 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
     /// </summary>
     public async Task<ListResultDto<InviteDto>> GetActivityInvitesAsync(EntityDto input)
     {
-        var query = _inviteManager.GetAll();
+        var query = _inviteManager.GetAll();        
+
         query = query.Where(i => i.ActivityId == input.Id);
         var selectQuery = GetSelectQueryForActivityInvites(query);
         var invites = await selectQuery.ToListAsync();
@@ -280,14 +282,20 @@ public class InviteAppService : OpticianAppServiceBase, IInviteAppService
                               },
                               CreationTime = invite.CreationTime,
                               CreatorUserId = invite.CreatorUserId,
-                              Responses = new List<CustomerResponseDto>{ new CustomerResponseDto
-                              {
-                                  Id = invite.UserId.Value,
-                                  Name = invite.User.FullName,
-                                  Response = (int)invite.Response
-                              } }
-                          };
-        return selectQuery;
-    }
-    #endregion
+                              Responses = invite.User != null ? 
+                              new List<CustomerResponseDto> 
+                              { 
+                                  new CustomerResponseDto 
+                                  {
+                                      Id = invite.UserId.Value,
+                                      Name = invite.User.FullName,
+                                      Response = (int)invite.Response
+                                  } 
+                              } 
+                              : new List<CustomerResponseDto>()
+                            
+                                                    };
+                                  return selectQuery;
+                              }
+            #endregion
 }

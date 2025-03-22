@@ -56,15 +56,15 @@ public class CustomerManager : ICustomerManager
 
 
         // Fetch the user from UserManager
-        var user = await _userManager.GetUserByIdAsync(id);
-        if (user == null)
-        {
-            throw new EntityNotFoundException(typeof(User), id);
-        }
+        //var user = await _userManager.GetUserByIdAsync(id);
+        //if (user == null)
+        //{
+        //    throw new EntityNotFoundException(typeof(User), id);
+        //}
 
         // Fetch the related customer from the Customer table
         var customer = await _customerRepository
-            .FirstOrDefaultAsync(c => c.Id == user.Id);
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         // If no customer found, create a new customer object with user data
         if (customer == null)
@@ -72,7 +72,7 @@ public class CustomerManager : ICustomerManager
             customer = new Customer
             {
                 Id = id,
-                UserId = user.Id,
+               // UserId = user.Id,
             };
         }
        

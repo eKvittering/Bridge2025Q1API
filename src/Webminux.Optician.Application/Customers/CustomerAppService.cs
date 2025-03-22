@@ -1,4 +1,4 @@
-using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
@@ -52,30 +52,53 @@ namespace Webminux.Optician.Customers
          [AbpAllowAnonymous]
         public async Task<long> CreateAsync(CreateCustomerDto input)
         {
-            int tenantId = 0;
-            if (AbpSession.TenantId != null && AbpSession.TenantId.Value > 0)
+            try
             {
-                tenantId = AbpSession.TenantId.Value;
-            }
-            else
-            {
-                tenantId =  input.TenantId;
-            }
+                int tenantId = AbpSession.TenantId.HasValue && AbpSession.TenantId.Value > 0
+                    ? AbpSession.TenantId.Value
+                    : input.TenantId;
 
-            if (!input.RoleNames.Any())
-            {
-                input.RoleNames = new string[] { "Admin" };
-            }
+                // Ensure RoleNames has at least "Admin"
+                if (!input.RoleNames.Any())
+                {
+                    input.RoleNames = new string[] { "Admin" };
+                }
 
-            Users.Dto.UserDto user = await _userAppService.CreateAsync(input);
-            Customer customer = Customer.Create(tenantId, input.CustomerNo, input.Address, input.Postcode, input.TownCity, input.Country, input.TelephoneFax, input.Website, input.Currency, user.Id,
-                input.ResponsibleEmployeeId, input.CustomeTypeId, input.ParentId, input.IsSubCustomer, input.Site);
-            long customerUserId = await _customerManager.CreateAsync(customer);
-            await UnitOfWorkManager.Current.SaveChangesAsync();
-            //  await CreateEntityFieldMappings(input.CustomFields, tenantId, customer.Id);
-            await _customFieldManager.CreateEntityFieldMappings(input.CustomFields, tenantId, customer.Id);
-            return customerUserId;
+                // Create the user
+                Users.Dto.UserDto user = await _userAppService.CreateAsync(input);
+
+                // Create the customer entity
+                Customer customer = Customer.Create(
+                    tenantId == 0 ? 1 : tenantId, 
+                    input.CustomerNo, input.Address, input.Postcode, input.TownCity,
+                    input.Country, input.TelephoneFax, input.Website, input.Currency, user.Id,
+                    input.ResponsibleEmployeeId, input.CustomeTypeId, input.ParentId,
+                    input.IsSubCustomer, input.Site
+                );
+
+                // Save customer
+                long customerUserId = await _customerManager.CreateAsync(customer);
+                await UnitOfWorkManager.Current.SaveChangesAsync();
+
+                // Create entity field mappings
+                await _customFieldManager.CreateEntityFieldMappings(input.CustomFields, tenantId, customer.Id);
+
+                return customerUserId;
+            }
+            catch (UserFriendlyException ex)
+            {
+                // Handle known errors
+                Logger.Error($"User-friendly error: {ex.Message}", ex);
+                throw new UserFriendlyException("An error occurred while creating the customer. Please try again.", ex);
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors
+                Logger.Error($"Unexpected error in CreateAsync: {ex.Message}", ex);
+                throw new UserFriendlyException("A system error occurred. Please contact support.", ex);
+            }
         }
+
 
         /// <summary>
         /// This method delete a customer.
@@ -179,7 +202,7 @@ namespace Webminux.Optician.Customers
             try
             {
                 var customer = await _customerManager.GetAsync(input.Id);
-                //User customer1 = await _userManager.GetUserByIdAsync(input.Id);
+                
                 if (customer == null)
                 {
                     throw new EntityNotFoundException(typeof(Customer), input.Id);
@@ -294,10 +317,15 @@ namespace Webminux.Optician.Customers
         {
             try
             {
+                int tenantId = AbpSession.TenantId.HasValue && AbpSession.TenantId.Value > 0
+                    ? AbpSession.TenantId.Value
+                    : 1;
+
                 // Get the base customer query and only include necessary fields
                 IQueryable<Customer> query = _customerManager.Customers
-                    .Include(c => c.User)
-                    .AsQueryable();
+                   .Include(c => c.User)
+                   .AsQueryable();
+
 
                 // Apply filters before projections to reduce data load
                 query = ApplyFilter(input, query);
