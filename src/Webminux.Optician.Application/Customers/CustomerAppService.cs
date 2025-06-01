@@ -126,7 +126,9 @@ namespace Webminux.Optician.Customers
                 CustomerNo = c.CustomerNo,
                 Name = c.User.Name,
                 EmailAddress = c.User.EmailAddress,
-                CustomerUserId = c.UserId
+                CustomerUserId = c.UserId,
+                TelephoneFax = c.TelephoneFax,
+                
             }).ToListAsync();
 
             return new ListResultDto<CustomerListDto>(customers);
