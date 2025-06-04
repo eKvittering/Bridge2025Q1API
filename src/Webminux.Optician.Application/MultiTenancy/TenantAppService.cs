@@ -3,6 +3,7 @@ using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.IdentityFramework;
 using Abp.Linq.Extensions;
@@ -13,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Webminux.Optician.Authorization;
@@ -190,9 +192,20 @@ namespace Webminux.Optician.MultiTenancy
 
         public async Task<PagedResultDto<TenantDto>> GetPagedTenantsAsync(PagedTenantResultRequestDto input)
         {
-            var filteredQuery = CreateFilteredQuery(input);
-            var selecQuery = GetSelectQuery(filteredQuery);
-            return await selecQuery.GetPagedResultAsync(input.SkipCount, input.MaxResultCount);
+            using (UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
+            {
+                var query = _userManager.Users;
+                var tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
+
+                var userName = query.Where(x => x.Id == AbpSession.UserId).Select(s => s.UserName).FirstOrDefault();
+                var tenantIds = query.Where(x => x.UserName == userName).Select(s => s.TenantId).ToList();
+                var filteredQuery = CreateFilteredQuery(input);
+                filteredQuery = filteredQuery.Where(f => tenantIds.Contains(f.Id));
+                var selecQuery = GetSelectQuery(filteredQuery);
+                return await selecQuery.GetPagedResultAsync(input.SkipCount, input.MaxResultCount);
+            }
+
+            
         }
 
         private async Task DeleteOldLogoAsync(Company company)
