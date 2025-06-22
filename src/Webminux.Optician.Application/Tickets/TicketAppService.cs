@@ -27,6 +27,8 @@ using Webminux.Optician.Faults;
 using Castle.MicroKernel.Registration;
 using Abp.EntityFrameworkCore.Extensions;
 using Webminux.Optician.Faults.Dtos;
+using Webminux.Optician.MultiTenancy;
+using Webminux.Optician.Core.Customers;
 
 namespace Webminux.Optician.Tickets
 {
@@ -50,6 +52,8 @@ namespace Webminux.Optician.Tickets
         private readonly IRepository<Note> _noteRepository;
         private readonly IRepository<ActivityResponsible> _activityResponsibleRepository;
         private readonly IRepository<Group> _groupRepository;
+        private readonly IRepository<Tenant> _tenantRepository;
+        private readonly IRepository<Customer> _customerRepository;
 
         /// <summary>
         /// DeTicket Constructor
@@ -68,7 +72,10 @@ namespace Webminux.Optician.Tickets
             IRepository<Fault> faultRepository,
             IRepository<Note> noteRepository,
             IRepository<ActivityResponsible> activityResponsible,
-            IRepository<Group> groupRepository
+            IRepository<Group> groupRepository,
+            IRepository<Tenant> tenantRepository,
+            IRepository<Customer> customerRepository
+
             )
         {
             _TicketRepository = TicketRepository;
@@ -85,6 +92,8 @@ namespace Webminux.Optician.Tickets
             _noteRepository = noteRepository;
             _activityResponsibleRepository = activityResponsible;
             _groupRepository = groupRepository;
+            _tenantRepository = tenantRepository;
+            _customerRepository = customerRepository;
         }
 
         #region CreateAsync
@@ -187,15 +196,51 @@ namespace Webminux.Optician.Tickets
         {
             try
             {
-                var tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
-                GroupDto group = await GetDefaultGroup();
-                input.GroupId = group.Id;
+                int? tenantId = AbpSession.TenantId;
+                if (AbpSession.TenantId == null)
+                {
+                    if(input.CustomerId == null || input.CustomerId <=0)
+                    {
+                        if (input.TenantId == null && input.TenantId <= 0)
+                            throw new UserFriendlyException("Tenant Id Not Entered.");
+                        else
+                        {
+                            var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.Id == input.TenantId);
+                            if(tenant == null)
+                                throw new UserFriendlyException("Incorrect Tenant Id Entered.");
 
-                Activity activity = await CreateTicketActivity(input.CustomerUserId, tenantId, input.EmployeeId, input.GroupId);
+                            tenantId = tenant.Id;
+
+                        }
+
+                        if ( string.IsNullOrWhiteSpace(input.CustomerNo))
+                            throw new UserFriendlyException("Customer Number Not Entered.");
+                        else
+                        {
+                            var customer = await _customerRepository.FirstOrDefaultAsync(x => x.CustomerNo == input.CustomerNo);
+                            if (customer == null)
+                                throw new UserFriendlyException("Incorrect Customer Number Entered.");
+
+                            input.CustomerId = customer.Id;
+                            input.CustomerUserId = (int)customer.UserId;
+                        }
+                    }
+                    
+
+                }
+                else
+                {
+                    tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
+                }
+
+                GroupDto group = await GetDefaultGroup();
+                //input.GroupId = group.Id;
+
+                Activity activity = await CreateTicketActivity(input.CustomerUserId, tenantId.Value, input.EmployeeId, input.GroupId);
                 MediaUploadDto uploadResult = new MediaUploadDto();
                 if (!string.IsNullOrWhiteSpace(input.Base64ImageString))
                     uploadResult = await _imageHelperService.AddMediaAsync(input.Base64ImageString);
-                Ticket Ticket = Ticket.Create(tenantId, activity.Id, input.Comment, input.Description, input.Status, input.Email, input.Date.ConvertDateStringToDate(),
+                Ticket Ticket = Ticket.Create(tenantId.Value, activity.Id, input.Comment, input.Description, input.Status, input.Email, input.Date.ConvertDateStringToDate(),
                     uploadResult.PublicId, uploadResult.Url, input.GroupId, input.CustomerId);
                 _TicketRepository.Insert(Ticket);
                 await UnitOfWorkManager.Current.SaveChangesAsync();

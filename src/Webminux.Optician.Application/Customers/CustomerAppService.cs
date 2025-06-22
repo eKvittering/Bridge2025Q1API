@@ -2,6 +2,7 @@
 using Abp.Authorization;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -16,6 +17,7 @@ using Webminux.Optician.Core.Customers;
 using Webminux.Optician.Customers.Dtos;
 using Webminux.Optician.CustomFields;
 using Webminux.Optician.Helpers;
+using Webminux.Optician.MultiTenancy;
 using Webminux.Optician.Users;
 using static Webminux.Optician.OpticianConsts;
 
@@ -30,6 +32,11 @@ namespace Webminux.Optician.Customers
         private readonly ICustomerManager _customerManager;
         private readonly UserManager _userManager;
         private readonly IRepository<CustomerType> _customerTypeRepository;
+        private readonly IRepository<Customer> _customerRepository;
+        private readonly IRepository<Tenant> _tenantRepository;
+        private readonly IRepository<User, long> repository, _userRepository;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
+
         private readonly ICustomFieldManager _customFieldManager;
 
         /// <summary>
@@ -38,12 +45,20 @@ namespace Webminux.Optician.Customers
         public CustomerAppService(IUserAppService userAppService,
         ICustomerManager customerManager,
         IRepository<CustomerType> customerTypeRepository,
-        ICustomFieldManager customFieldManager)
+        ICustomFieldManager customFieldManager,
+        IRepository<Customer> customerRepository,
+        IRepository<Tenant> tenantRepository,
+        IRepository<User, long> userRepository,
+        IUnitOfWorkManager unitOfWorkManager)
         {
             _userAppService = userAppService;
             _customerManager = customerManager;
             _customerTypeRepository = customerTypeRepository;
             _customFieldManager = customFieldManager;
+            _customerRepository = customerRepository;
+            _tenantRepository = tenantRepository;
+            _userRepository = userRepository;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         /// <summary>
@@ -117,9 +132,10 @@ namespace Webminux.Optician.Customers
         /// <summary>
         /// This method gets  all customer.
         /// </summary>
-      
+
         public async Task<ListResultDto<CustomerListDto>> GetAllAsync()
         {
+            var info = AbpSession;
             System.Collections.Generic.List<CustomerListDto> customers = await _customerManager.Customers.Select(c => new CustomerListDto
             {
                 Id = c.Id,
@@ -128,11 +144,40 @@ namespace Webminux.Optician.Customers
                 EmailAddress = c.User.EmailAddress,
                 CustomerUserId = c.UserId,
                 TelephoneFax = c.TelephoneFax,
-                
+
             }).ToListAsync();
 
             return new ListResultDto<CustomerListDto>(customers);
         }
+
+
+        //public async Task<ListResultDto<CustomerListDto>> GetAllAsync()
+        //{
+        //    var info = AbpSession;
+        //    using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant))
+        //    {
+        //        using (CurrentUnitOfWork.SetTenantId(null))
+        //        {
+        //            var query = from customer in _customerRepository.GetAll()
+        //                        join user in _userRepository.GetAll() on customer.UserId equals user.Id
+        //                        select new CustomerListDto
+        //                        {
+        //                            Id = customer.Id,
+        //                            CustomerNo = customer.CustomerNo,
+        //                            Name = user.Name,
+        //                            EmailAddress = user.EmailAddress,
+        //                            CustomerUserId = customer.UserId,
+        //                            TelephoneFax = customer.TelephoneFax,
+        //                            TenantId = customer.TenantId
+        //                        };
+
+        //            var customers = await query.ToListAsync();
+        //            return new ListResultDto<CustomerListDto>(customers);
+
+        //        }
+        //    }
+        //}
+
 
         /// <summary>
         /// GetAllLazyLoadingAsync
