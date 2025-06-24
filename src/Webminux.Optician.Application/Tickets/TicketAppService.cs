@@ -197,6 +197,8 @@ namespace Webminux.Optician.Tickets
             try
             {
                 int? tenantId = AbpSession.TenantId;
+                GroupDto group = await GetDefaultGroup();
+
                 if (AbpSession.TenantId == null)
                 {
                     if(input.CustomerId == null || input.CustomerId <=0)
@@ -225,16 +227,19 @@ namespace Webminux.Optician.Tickets
                             input.CustomerUserId = (int)customer.UserId;
                         }
                     }
-                    
+                    else
+                    {
+                        var customer = await _customerRepository.FirstOrDefaultAsync(x => x.Id == input.CustomerId);
+                        tenantId = customer.TenantId;
+                    }
 
                 }
                 else
                 {
                     tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
+                    input.GroupId = group.Id;
                 }
 
-                GroupDto group = await GetDefaultGroup();
-                //input.GroupId = group.Id;
 
                 Activity activity = await CreateTicketActivity(input.CustomerUserId, tenantId.Value, input.EmployeeId, input.GroupId);
                 MediaUploadDto uploadResult = new MediaUploadDto();
@@ -383,6 +388,7 @@ namespace Webminux.Optician.Tickets
                                   GroupId = t.GroupId,
                                   Group = t.Group,
                                   TicketNumber = t.TicketNumber,
+                                  TenantId = t.TenantId
                               })
                               .OrderByDescending(t => t.CreationTime)
                               .ToList();
