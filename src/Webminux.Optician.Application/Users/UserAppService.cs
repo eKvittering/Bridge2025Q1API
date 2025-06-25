@@ -151,7 +151,7 @@ namespace Webminux.Optician.Users
                     // query=query.Where(c=>c.UserType.Name==OpticianConsts.UserTypes.Employee);
                 }
 
-                if(tenantId > 0)
+                if(AbpSession.TenantId != null  && AbpSession.TenantId > 0)
                 {
                     query = query.Where(a => a.TenantId == tenantId);
                 }
