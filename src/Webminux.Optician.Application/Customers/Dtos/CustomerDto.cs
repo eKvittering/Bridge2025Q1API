@@ -172,6 +172,7 @@ namespace Webminux.Optician.Customers.Dtos
         public bool IsSubCustomerOpen { get; set; } = true;
         public string CustomerType { get; set; }
         public string Site { get; set; }
+        public int TenantId { get; set; }
 
         public string ResponsibleEmployee { get; set; }
 
