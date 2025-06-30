@@ -64,7 +64,7 @@ namespace Webminux.Optician.Customers
         /// <summary>
         /// This method creates a new customer.
         /// </summary>
-         [AbpAllowAnonymous]
+        [AbpAllowAnonymous]
         public async Task<long> CreateAsync(CreateCustomerDto input)
         {
             try
@@ -84,7 +84,7 @@ namespace Webminux.Optician.Customers
 
                 // Create the customer entity
                 Customer customer = Customer.Create(
-                    tenantId == 0 ? 1 : tenantId, 
+                    tenantId == 0 ? 1 : tenantId,
                     input.CustomerNo, input.Address, input.Postcode, input.TownCity,
                     input.Country, input.TelephoneFax, input.Website, input.Currency, user.Id,
                     input.ResponsibleEmployeeId, input.CustomeTypeId, input.ParentId,
@@ -144,6 +144,7 @@ namespace Webminux.Optician.Customers
                 EmailAddress = c.User.EmailAddress,
                 CustomerUserId = c.UserId,
                 TelephoneFax = c.TelephoneFax,
+                TenantId = c.TenantId
 
             }).ToListAsync();
 
@@ -249,7 +250,7 @@ namespace Webminux.Optician.Customers
             try
             {
                 var customer = await _customerManager.GetAsync(input.Id);
-                
+
                 if (customer == null)
                 {
                     throw new EntityNotFoundException(typeof(Customer), input.Id);
@@ -365,32 +366,60 @@ namespace Webminux.Optician.Customers
             try
             {
                 int tenantId = AbpSession.TenantId.HasValue && AbpSession.TenantId.Value > 0
-                    ? AbpSession.TenantId.Value
-                    : 1;
+                        ? AbpSession.TenantId.Value
+                        : 1;
 
-                // Get the base customer query and only include necessary fields
-                IQueryable<Customer> query = _customerManager.Customers
-                   .Include(c => c.User)
-                   .AsQueryable();
+                if (AbpSession.TenantId == null)
+                {
+                    using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
+                    {
 
 
-                // Apply filters before projections to reduce data load
-                query = ApplyFilter(input, query);
-                query = query.OrderByDescending(c => c.Id);
-                // Use the method to get the select query
-                IQueryable<CustomerDto> selectQuery = GetSelectQuery(query);
+                        // Get the base customer query and only include necessary fields
+                        IQueryable<Customer> query = _customerManager.Customers
+                           .Include(c => c.User)
+                           .AsQueryable();
 
-                // Get total count first (without Skip/Take)
-                int totalCount = await query.CountAsync();
+                        // Apply filters before projections to reduce data load
+                        query = ApplyFilter(input, query);
+                        query = query.OrderByDescending(c => c.Id);
+                        // Use the method to get the select query
+                        IQueryable<CustomerDto> selectQuery = GetSelectQuery(query);
+                        int totalCount = await query.CountAsync();
 
-                // Perform paging using Skip and Take
-                List<CustomerDto> pagedItems = await selectQuery
-                    .Skip(input.SkipCount)
-                    .Take(input.MaxResultCount)
-                    .ToListAsync();
+                        // Perform paging using Skip and Take
+                        List<CustomerDto> pagedItems = await selectQuery
+                            .Skip(input.SkipCount)
+                            .Take(input.MaxResultCount)
+                            .ToListAsync();
 
-                // Return paged result
-                return new PagedResultDto<CustomerDto>(totalCount, pagedItems);
+                        // Return paged result
+                        return new PagedResultDto<CustomerDto>(totalCount, pagedItems);
+                    }
+                }
+                else
+                {
+                    // Get the base customer query and only include necessary fields
+                    IQueryable<Customer> query = _customerManager.Customers
+                       .Include(c => c.User)
+                       .AsQueryable();
+
+                    // Apply filters before projections to reduce data load
+                    query = ApplyFilter(input, query);
+                    query = query.OrderByDescending(c => c.Id);
+                    // Use the method to get the select query
+                    IQueryable<CustomerDto> selectQuery = GetSelectQuery(query);
+                    int totalCount = await query.CountAsync();
+
+                    // Perform paging using Skip and Take
+                    List<CustomerDto> pagedItems = await selectQuery
+                        .Skip(input.SkipCount)
+                        .Take(input.MaxResultCount)
+                        .ToListAsync();
+
+                    // Return paged result
+                    return new PagedResultDto<CustomerDto>(totalCount, pagedItems);
+                }
             }
             catch (Exception ex)
             {
@@ -426,6 +455,7 @@ namespace Webminux.Optician.Customers
                 CustomerType = c.CustomerType != null ? c.CustomerType.Type : string.Empty,
                 ResponsibleEmployee = c.ResponsibleEmployee != null ? c.ResponsibleEmployee.FullName : string.Empty,
                 IsSubCustomer = c.IsSubCustomer,
+                TenantId = c.TenantId,
                 SubCustomers = c.SubCustomers.Select(s => new CustomerDto
                 {
                     Id = s.Id,
@@ -527,7 +557,7 @@ namespace Webminux.Optician.Customers
                     a.UserId.ToString().Contains(input.Keyword) ||
                     a.Site.Trim().ToLower().Contains(input.Keyword));
 
-   
+
                 if (input.showAllSubCustomers)
                 {
                     query = query.Where(a => a.SubCustomers.Any(s =>
@@ -584,12 +614,12 @@ namespace Webminux.Optician.Customers
                 query = query.Where(p => p.ParentId == null);
             }
 
-  
+
             if (input.CustomerTypeId.HasValue)
             {
                 if (input.CustomerTypeId == 3)
                 {
-          
+
                     query = query.Where(p => _customerManager.Customers.Any(s => s.ParentId == p.Id));
                 }
                 else
@@ -606,7 +636,7 @@ namespace Webminux.Optician.Customers
             return query;
         }
 
-       
+
 
         //private static IQueryable<CustomerDto> GetSelectQuery(IQueryable<Customer> query)
         //{
