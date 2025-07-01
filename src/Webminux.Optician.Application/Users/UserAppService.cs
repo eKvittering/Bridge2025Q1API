@@ -25,6 +25,7 @@ using Webminux.Optician.Authorization;
 using Webminux.Optician.Authorization.Roles;
 using Webminux.Optician.Authorization.Users;
 using Webminux.Optician.Helpers;
+using Webminux.Optician.MultiTenancy;
 using Webminux.Optician.Roles.Dto;
 using Webminux.Optician.Users.Dto;
 
@@ -36,6 +37,8 @@ namespace Webminux.Optician.Users
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
         private readonly IRepository<Role> _roleRepository;
+        private readonly IRepository<Tenant> _tenantRepository;
+
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IAbpSession _abpSession;
         private readonly LogInManager _logInManager;
@@ -50,6 +53,7 @@ namespace Webminux.Optician.Users
             UserManager userManager,
             RoleManager roleManager,
             IRepository<Role> roleRepository,
+            IRepository<Tenant> tenantRepository,
             IPasswordHasher<User> passwordHasher,
             IAbpSession abpSession,
             LogInManager logInManager,
@@ -61,6 +65,7 @@ namespace Webminux.Optician.Users
             _userManager = userManager;
             _roleManager = roleManager;
             _roleRepository = roleRepository;
+            _tenantRepository = tenantRepository;
             _passwordHasher = passwordHasher;
             _abpSession = abpSession;
             _logInManager = logInManager;
@@ -139,6 +144,13 @@ namespace Webminux.Optician.Users
             using (UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
             {
                 var query = _userManager.Users;
+                string tenancyName = "";
+                if (AbpSession.TenantId != null)
+                {
+                    var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.Id == AbpSession.TenantId);
+                    if (tenant != null)
+                        tenancyName = tenant.TenancyName;
+                }
                 var tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
                 if (input.UserTypeId.HasValue)
                     query = query.Where(a => a.UserTypeId == input.UserTypeId);
@@ -151,7 +163,7 @@ namespace Webminux.Optician.Users
                     // query=query.Where(c=>c.UserType.Name==OpticianConsts.UserTypes.Employee);
                 }
 
-                if(AbpSession.TenantId != null  && AbpSession.TenantId > 0)
+                if(AbpSession.TenantId != null && AbpSession.TenantId > 0 && tenancyName != "5000")
                 {
                     query = query.Where(a => a.TenantId == tenantId);
                 }

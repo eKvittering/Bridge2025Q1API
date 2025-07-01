@@ -368,8 +368,15 @@ namespace Webminux.Optician.Customers
                 int tenantId = AbpSession.TenantId.HasValue && AbpSession.TenantId.Value > 0
                         ? AbpSession.TenantId.Value
                         : 1;
+                string tenancyName = "";
+                if (AbpSession.TenantId != null)
+                {
+                    var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.Id == AbpSession.TenantId);
+                    if (tenant != null)
+                        tenancyName = tenant.TenancyName;
+                }
 
-                if (AbpSession.TenantId == null)
+                if (AbpSession.TenantId == null || tenancyName=="5000")
                 {
                     using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
                     {
@@ -456,32 +463,32 @@ namespace Webminux.Optician.Customers
                 ResponsibleEmployee = c.ResponsibleEmployee != null ? c.ResponsibleEmployee.FullName : string.Empty,
                 IsSubCustomer = c.IsSubCustomer,
                 TenantId = c.TenantId,
-                SubCustomers = c.SubCustomers.Select(s => new CustomerDto
-                {
-                    Id = s.Id,
-                    CustomerNo = s.CustomerNo,
-                    Address = s.Address,
-                    Postcode = s.Postcode,
-                    TownCity = s.TownCity,
-                    Country = s.Country,
-                    TelephoneFax = s.TelephoneFax,
-                    Website = s.Website,
-                    Currency = s.Currency,
-                    UserId = s.UserId,
-                    UserName = s.User.UserName,
-                    Name = s.User.Name,
-                    Surname = s.User.Surname,
-                    FullName = s.User.FullName,
-                    EmailAddress = s.User.EmailAddress,
-                    CreationTime = s.User.CreationTime,
-                    UserTypeId = s.User.UserTypeId,
-                    ParentId = s.ParentId,
-                    Site = s.Site,
-                    CustomerTypeId = s.CustomeTypeId,
-                    CustomerType = s.CustomerType != null ? s.CustomerType.Type : string.Empty,
-                    ResponsibleEmployee = s.ResponsibleEmployee != null ? s.ResponsibleEmployee.FullName : string.Empty,
-                    IsSubCustomer = s.IsSubCustomer
-                }).ToList()
+                //SubCustomers = c.SubCustomers.Select(s => new CustomerDto
+                //{
+                //    Id = s.Id,
+                //    CustomerNo = s.CustomerNo,
+                //    Address = s.Address,
+                //    Postcode = s.Postcode,
+                //    TownCity = s.TownCity,
+                //    Country = s.Country,
+                //    TelephoneFax = s.TelephoneFax,
+                //    Website = s.Website,
+                //    Currency = s.Currency,
+                //    UserId = s.UserId,
+                //    UserName = s.User.UserName,
+                //    Name = s.User.Name,
+                //    Surname = s.User.Surname,
+                //    FullName = s.User.FullName,
+                //    EmailAddress = s.User.EmailAddress,
+                //    CreationTime = s.User.CreationTime,
+                //    UserTypeId = s.User.UserTypeId,
+                //    ParentId = s.ParentId,
+                //    Site = s.Site,
+                //    CustomerTypeId = s.CustomeTypeId,
+                //    CustomerType = s.CustomerType != null ? s.CustomerType.Type : string.Empty,
+                //    ResponsibleEmployee = s.ResponsibleEmployee != null ? s.ResponsibleEmployee.FullName : string.Empty,
+                //    IsSubCustomer = s.IsSubCustomer
+                //}).ToList()
             });
         }
 

@@ -194,18 +194,22 @@ namespace Webminux.Optician.MultiTenancy
         {
             using (UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
             {
-                var query = _userManager.Users;
-                var tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
+                //var query = _userManager.Users;
+                //var tenantId = AbpSession.TenantId ?? OpticianConsts.DefaultTenantId;
 
-                var userName = query.Where(x => x.Id == AbpSession.UserId).Select(s => s.UserName).FirstOrDefault();
-                var tenantIds = query.Where(x => x.UserName == userName).Select(s => s.TenantId).ToList();
+                //var userName = query.Where(x => x.Id == AbpSession.UserId).Select(s => s.UserName).FirstOrDefault();
+                //var tenantIds = query.Where(x => x.UserName == userName).Select(s => s.TenantId).ToList();
+                //var filteredQuery = CreateFilteredQuery(input);
+                //filteredQuery = filteredQuery.Where(f => tenantIds.Contains(f.Id));
+                //var selecQuery = GetSelectQuery(filteredQuery);
+                //return await selecQuery.GetPagedResultAsync(input.SkipCount, input.MaxResultCount);
                 var filteredQuery = CreateFilteredQuery(input);
-                filteredQuery = filteredQuery.Where(f => tenantIds.Contains(f.Id));
                 var selecQuery = GetSelectQuery(filteredQuery);
                 return await selecQuery.GetPagedResultAsync(input.SkipCount, input.MaxResultCount);
+
             }
 
-            
+
         }
 
         private async Task DeleteOldLogoAsync(Company company)
