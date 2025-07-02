@@ -54,6 +54,8 @@ namespace Webminux.Optician.Tickets
         private readonly IRepository<Group> _groupRepository;
         private readonly IRepository<Tenant> _tenantRepository;
         private readonly IRepository<Customer> _customerRepository;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
+
 
         /// <summary>
         /// DeTicket Constructor
@@ -74,8 +76,8 @@ namespace Webminux.Optician.Tickets
             IRepository<ActivityResponsible> activityResponsible,
             IRepository<Group> groupRepository,
             IRepository<Tenant> tenantRepository,
-            IRepository<Customer> customerRepository
-
+            IRepository<Customer> customerRepository,
+            IUnitOfWorkManager unitOfWorkManager
             )
         {
             _TicketRepository = TicketRepository;
@@ -94,6 +96,7 @@ namespace Webminux.Optician.Tickets
             _groupRepository = groupRepository;
             _tenantRepository = tenantRepository;
             _customerRepository = customerRepository;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         #region CreateAsync
@@ -201,21 +204,21 @@ namespace Webminux.Optician.Tickets
 
                 if (AbpSession.TenantId == null)
                 {
-                    if(input.CustomerId == null || input.CustomerId <=0)
+                    if (input.CustomerId == null || input.CustomerId <= 0)
                     {
                         if (input.TenantId == null && input.TenantId <= 0)
                             throw new UserFriendlyException("Tenant Id Not Entered.");
                         else
                         {
                             var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.Id == input.TenantId);
-                            if(tenant == null)
+                            if (tenant == null)
                                 throw new UserFriendlyException("Incorrect Tenant Id Entered.");
 
                             tenantId = tenant.Id;
 
                         }
 
-                        if ( string.IsNullOrWhiteSpace(input.CustomerNo))
+                        if (string.IsNullOrWhiteSpace(input.CustomerNo))
                             throw new UserFriendlyException("Customer Number Not Entered.");
                         else
                         {
@@ -320,8 +323,8 @@ namespace Webminux.Optician.Tickets
 
 
                 var activity = Activity.Create(
-                    tenantId,null, activityType.Name,null,currentDate, followDate, activityType.Id, followUpType.Id,
-                    activityArt.Id, employeeId, customerId, null, false );
+                    tenantId, null, activityType.Name, null, currentDate, followDate, activityType.Id, followUpType.Id,
+                    activityArt.Id, employeeId, customerId, null, false);
 
 
                 activity = await _activityManager.CreateAsync(activity);
@@ -368,57 +371,131 @@ namespace Webminux.Optician.Tickets
         {
             try
             {
-                List<TicketDto> result = null;
-                if (input.EmployeeId > 0)
+                string tenancyName = "";
+                if (AbpSession.TenantId != null)
                 {
-                    result = (from t in _TicketRepository.GetAll()
-                              select new TicketDto
-                              {
-                                  Id = t.Id,
-                                  Comment = t.Comment,
-                                  SolutionNote = t.SolutionNote,
-                                  Status = t.Status.GetEnumValueAsString(),
-                                  Date = t.Date,
-                                  Email = t.Email,
-                                  ImagePublicKey = t.ImagePublicKey,
-                                  ImageUrl = t.ImageUrl,
-                                  CreationTime = t.CreationTime,
-                                  CreatorUserId = t.CreatorUserId,
-                                  ActivityId = t.ActivityId ?? 0,
-                                  GroupId = t.GroupId,
-                                  Group = t.Group,
-                                  TicketNumber = t.TicketNumber,
-                                  TenantId = t.TenantId
-                              })
-                              .OrderByDescending(t => t.CreationTime)
-                              .ToList();
+                    var tenant = _tenantRepository.FirstOrDefault(x => x.Id == AbpSession.TenantId);
+                    if (tenant != null)
+                        tenancyName = tenant.TenancyName;
+                }
 
+                List<TicketDto> result = null;
+
+
+                if (AbpSession.TenantId == null || tenancyName == "5000")
+                {
+                    using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
+                    {
+                        if (input.EmployeeId > 0)
+                        {
+                            result = (from t in _TicketRepository.GetAll()
+                                      select new TicketDto
+                                      {
+                                          Id = t.Id,
+                                          Comment = t.Comment,
+                                          SolutionNote = t.SolutionNote,
+                                          Status = t.Status.GetEnumValueAsString(),
+                                          Date = t.Date,
+                                          Email = t.Email,
+                                          ImagePublicKey = t.ImagePublicKey,
+                                          ImageUrl = t.ImageUrl,
+                                          CreationTime = t.CreationTime,
+                                          CreatorUserId = t.CreatorUserId,
+                                          ActivityId = t.ActivityId ?? 0,
+                                          GroupId = t.GroupId,
+                                          Group = t.Group,
+                                          TicketNumber = t.TicketNumber,
+                                          TenantId = t.TenantId
+                                      })
+                                      .OrderByDescending(t => t.CreationTime)
+                                      .ToList();
+
+                        }
+                        else
+                        {
+                            result = (from t in _TicketRepository.GetAll()
+                                      where t.CustomerId == input.CustomerUserId
+                                      select new TicketDto
+                                      {
+                                          Id = t.Id,
+                                          Comment = t.Comment,
+                                          SolutionNote = t.SolutionNote,
+                                          Status = t.Status.GetEnumValueAsString(),
+                                          Date = t.Date,
+                                          Email = t.Email,
+                                          ImagePublicKey = t.ImagePublicKey,
+                                          ImageUrl = t.ImageUrl,
+                                          CreationTime = t.CreationTime,
+                                          CreatorUserId = t.CreatorUserId,
+                                          ActivityId = t.ActivityId ?? 0,
+                                          GroupId = t.GroupId,
+                                          Group = t.Group,
+                                          TicketNumber = t.TicketNumber,
+                                      })
+                                      .OrderByDescending(t => t.CreationTime)
+                                      .ToList();
+
+                        }
+
+                    }
                 }
                 else
                 {
-                    result = (from t in _TicketRepository.GetAll()
-                              where t.CustomerId == input.CustomerUserId
-                              select new TicketDto
-                              {
-                                  Id = t.Id,
-                                  Comment = t.Comment,
-                                  SolutionNote = t.SolutionNote,
-                                  Status = t.Status.GetEnumValueAsString(),
-                                  Date = t.Date,
-                                  Email = t.Email,
-                                  ImagePublicKey = t.ImagePublicKey,
-                                  ImageUrl = t.ImageUrl,
-                                  CreationTime = t.CreationTime,
-                                  CreatorUserId = t.CreatorUserId,
-                                  ActivityId = t.ActivityId ?? 0,
-                                  GroupId = t.GroupId,
-                                  Group = t.Group,
-                                  TicketNumber = t.TicketNumber,
-                              })
-                              .OrderByDescending(t => t.CreationTime)
-                              .ToList();
+                    if (input.EmployeeId > 0)
+                    {
+                        result = (from t in _TicketRepository.GetAll()
+                                  select new TicketDto
+                                  {
+                                      Id = t.Id,
+                                      Comment = t.Comment,
+                                      SolutionNote = t.SolutionNote,
+                                      Status = t.Status.GetEnumValueAsString(),
+                                      Date = t.Date,
+                                      Email = t.Email,
+                                      ImagePublicKey = t.ImagePublicKey,
+                                      ImageUrl = t.ImageUrl,
+                                      CreationTime = t.CreationTime,
+                                      CreatorUserId = t.CreatorUserId,
+                                      ActivityId = t.ActivityId ?? 0,
+                                      GroupId = t.GroupId,
+                                      Group = t.Group,
+                                      TicketNumber = t.TicketNumber,
+                                      TenantId = t.TenantId
+                                  })
+                                  .OrderByDescending(t => t.CreationTime)
+                                  .ToList();
+
+                    }
+                    else
+                    {
+                        result = (from t in _TicketRepository.GetAll()
+                                  where t.CustomerId == input.CustomerUserId
+                                  select new TicketDto
+                                  {
+                                      Id = t.Id,
+                                      Comment = t.Comment,
+                                      SolutionNote = t.SolutionNote,
+                                      Status = t.Status.GetEnumValueAsString(),
+                                      Date = t.Date,
+                                      Email = t.Email,
+                                      ImagePublicKey = t.ImagePublicKey,
+                                      ImageUrl = t.ImageUrl,
+                                      CreationTime = t.CreationTime,
+                                      CreatorUserId = t.CreatorUserId,
+                                      ActivityId = t.ActivityId ?? 0,
+                                      GroupId = t.GroupId,
+                                      Group = t.Group,
+                                      TicketNumber = t.TicketNumber,
+                                  })
+                                  .OrderByDescending(t => t.CreationTime)
+                                  .ToList();
+
+                    }
 
                 }
+
+
+
 
                 if (!string.IsNullOrEmpty(input.Keyword))
                 {
@@ -674,8 +751,8 @@ namespace Webminux.Optician.Tickets
                         Id = n.Id,
                         Title = n.Title,
                         Description = n.Description,
-                       // UserId = n.CustomerId,
-                         UserId = n.UserId,
+                        // UserId = n.CustomerId,
+                        UserId = n.UserId,
                         ActivityId = n.ActivityId,
                         TicketId = n.TicketId,
                         ActivityResponsibles = _activityResponsibleRepository.GetAll()

@@ -7,6 +7,7 @@ using Abp.UI;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Webminux.Optician.Application.Customers;
@@ -388,7 +389,7 @@ namespace Webminux.Optician.Customers
                            .AsQueryable();
 
                         // Apply filters before projections to reduce data load
-                        query = ApplyFilter(input, query);
+                        query = ApplyFilter(input, query,tenancyName);
                         query = query.OrderByDescending(c => c.Id);
                         // Use the method to get the select query
                         IQueryable<CustomerDto> selectQuery = GetSelectQuery(query);
@@ -543,7 +544,7 @@ namespace Webminux.Optician.Customers
             return new ListResultDto<CustomerDto>(customers);
         }
 
-        private IQueryable<Customer> ApplyFilter(PagedCustomerResultRequestDto input, IQueryable<Customer> query)
+        private IQueryable<Customer> ApplyFilter(PagedCustomerResultRequestDto input, IQueryable<Customer> query, string tenancyName="")
         {
 
             if (!string.IsNullOrWhiteSpace(input.Keyword))
@@ -585,6 +586,11 @@ namespace Webminux.Optician.Customers
             if (input.CustomerUserId > 0)
             {
                 query = query.Where(c => c.UserId == input.CustomerUserId);
+            }
+
+            if (input.TenantId > 0 && tenancyName != "5000")
+            {
+                query = query.Where(c => c.TenantId == input.TenantId);
             }
 
             if (!string.IsNullOrWhiteSpace(input.CustomerNumber))

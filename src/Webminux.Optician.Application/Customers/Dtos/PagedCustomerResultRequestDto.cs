@@ -12,7 +12,7 @@ namespace Webminux.Optician.Application.Customers.Dtos
         /// </summary>
         public string Keyword { get; set; }
 
-
+        public int TenantId { get; set; }
         public bool showAllSubCustomers { get; set; } = true;
 
         /// <summary>
