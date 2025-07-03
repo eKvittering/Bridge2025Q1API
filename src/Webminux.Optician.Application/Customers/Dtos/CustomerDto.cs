@@ -173,6 +173,7 @@ namespace Webminux.Optician.Customers.Dtos
         public string CustomerType { get; set; }
         public string Site { get; set; }
         public int TenantId { get; set; }
+        public string TenantName { get; set; }
 
         public string ResponsibleEmployee { get; set; }
 
