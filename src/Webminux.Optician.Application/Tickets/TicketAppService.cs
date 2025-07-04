@@ -29,6 +29,7 @@ using Abp.EntityFrameworkCore.Extensions;
 using Webminux.Optician.Faults.Dtos;
 using Webminux.Optician.MultiTenancy;
 using Webminux.Optician.Core.Customers;
+using static Webminux.Optician.Authorization.Roles.StaticRoleNames;
 
 namespace Webminux.Optician.Tickets
 {
@@ -389,6 +390,9 @@ namespace Webminux.Optician.Tickets
                         if (input.EmployeeId > 0)
                         {
                             result = (from t in _TicketRepository.GetAll()
+                                      join tenant in _tenantRepository.GetAll()
+                                      on t.TenantId equals tenant.Id into tenantJoin
+                                      from tenant in tenantJoin.DefaultIfEmpty()
                                       select new TicketDto
                                       {
                                           Id = t.Id,
@@ -405,7 +409,8 @@ namespace Webminux.Optician.Tickets
                                           GroupId = t.GroupId,
                                           Group = t.Group,
                                           TicketNumber = t.TicketNumber,
-                                          TenantId = t.TenantId
+                                          TenantId = t.TenantId,
+                                          TenantName = tenant != null ? tenant.TenancyName : "Host"
                                       })
                                       .OrderByDescending(t => t.CreationTime)
                                       .ToList();
@@ -415,6 +420,9 @@ namespace Webminux.Optician.Tickets
                         {
                             result = (from t in _TicketRepository.GetAll()
                                       where t.CustomerId == input.CustomerUserId
+                                      join tenant in _tenantRepository.GetAll()
+                                      on t.TenantId equals tenant.Id into tenantJoin
+                                      from tenant in tenantJoin.DefaultIfEmpty()
                                       select new TicketDto
                                       {
                                           Id = t.Id,
@@ -430,7 +438,9 @@ namespace Webminux.Optician.Tickets
                                           ActivityId = t.ActivityId ?? 0,
                                           GroupId = t.GroupId,
                                           Group = t.Group,
+                                          TenantId = t.TenantId,
                                           TicketNumber = t.TicketNumber,
+                                          TenantName = tenant != null ? tenant.TenancyName : "Host"
                                       })
                                       .OrderByDescending(t => t.CreationTime)
                                       .ToList();
@@ -444,6 +454,9 @@ namespace Webminux.Optician.Tickets
                     if (input.EmployeeId > 0)
                     {
                         result = (from t in _TicketRepository.GetAll()
+                                  join tenant in _tenantRepository.GetAll()
+                                     on t.TenantId equals tenant.Id into tenantJoin
+                                  from tenant in tenantJoin.DefaultIfEmpty()
                                   select new TicketDto
                                   {
                                       Id = t.Id,
@@ -460,7 +473,8 @@ namespace Webminux.Optician.Tickets
                                       GroupId = t.GroupId,
                                       Group = t.Group,
                                       TicketNumber = t.TicketNumber,
-                                      TenantId = t.TenantId
+                                      TenantId = t.TenantId,
+                                      TenantName = tenant != null ? tenant.TenancyName : "Host"
                                   })
                                   .OrderByDescending(t => t.CreationTime)
                                   .ToList();
@@ -470,6 +484,9 @@ namespace Webminux.Optician.Tickets
                     {
                         result = (from t in _TicketRepository.GetAll()
                                   where t.CustomerId == input.CustomerUserId
+                                  join tenant in _tenantRepository.GetAll()
+                                     on t.TenantId equals tenant.Id into tenantJoin
+                                  from tenant in tenantJoin.DefaultIfEmpty()
                                   select new TicketDto
                                   {
                                       Id = t.Id,
@@ -486,6 +503,8 @@ namespace Webminux.Optician.Tickets
                                       GroupId = t.GroupId,
                                       Group = t.Group,
                                       TicketNumber = t.TicketNumber,
+                                      TenantId = t.TenantId,
+                                      TenantName = tenant != null ? tenant.TenancyName : "Host"
                                   })
                                   .OrderByDescending(t => t.CreationTime)
                                   .ToList();

@@ -33,6 +33,7 @@ namespace Webminux.Optician.Tickets.Dtos
         public virtual bool IsExpanded { get; set; }
         public virtual int? CustomerId { get; set; }
         public virtual int? TenantId { get; set; }
+        public virtual string TenantName { get; set; }
         public virtual List<FaultDto> Faults { get; set; }
         public virtual List<NoteDto> Notes { get; set; }
 
