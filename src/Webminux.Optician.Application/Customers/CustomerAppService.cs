@@ -353,6 +353,7 @@ namespace Webminux.Optician.Customers
                 CustomerTypeId = customer.CustomeTypeId,
                 IsSubCustomer = customer.IsSubCustomer,
                 Site = customer.Site,
+                TenantId = customer.TenantId
             };
         }
         #endregion

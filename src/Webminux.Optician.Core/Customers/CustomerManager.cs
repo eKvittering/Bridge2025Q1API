@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Abp.Domain.Entities;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Castle.Core.Resource;
 using Microsoft.Extensions.Caching.Distributed;
 using Webminux.Optician.Authorization.Users;
@@ -15,14 +16,17 @@ public class CustomerManager : ICustomerManager
     private readonly IRepository<Customer> _customerRepository;
     private readonly UserManager _userManager;
     private readonly IDistributedCache _distributedCache;
+    private readonly IUnitOfWorkManager _unitOfWorkManager;
 
     private const string CustomerCacheKeyPrefix = "CustomerCache_";
 
-    public CustomerManager(IRepository<Customer> customerRepository, UserManager userManager, IDistributedCache distributedCache)
+    public CustomerManager(IRepository<Customer> customerRepository, UserManager userManager, IDistributedCache distributedCache,
+        IUnitOfWorkManager unitOfWorkManager)
     {
         _customerRepository = customerRepository;
         _userManager = userManager;
         _distributedCache = distributedCache;
+        _unitOfWorkManager = unitOfWorkManager;
     }
 
     public IQueryable<Customer> Customers => _customerRepository.GetAll();
@@ -45,13 +49,13 @@ public class CustomerManager : ICustomerManager
     }
     public async Task<Customer> GetAsync(int id)
     {
-        var cacheKey = CustomerCacheKeyPrefix + id;
+        //var cacheKey = CustomerCacheKeyPrefix + id;
 
-        var cachedCustomer = await _distributedCache.GetStringAsync(cacheKey);
-        if (!string.IsNullOrEmpty(cachedCustomer))
-        {
-            return JsonSerializer.Deserialize<Customer>(cachedCustomer);
-        }
+        //var cachedCustomer = await _distributedCache.GetStringAsync(cacheKey);
+        //if (!string.IsNullOrEmpty(cachedCustomer))
+        //{
+        //    return JsonSerializer.Deserialize<Customer>(cachedCustomer);
+        //}
 
 
 
@@ -63,27 +67,32 @@ public class CustomerManager : ICustomerManager
         //}
 
         // Fetch the related customer from the Customer table
-        var customer = await _customerRepository
-            .FirstOrDefaultAsync(c => c.Id == id);
+        //var customer = await _customerRepository
+        //    .FirstOrDefaultAsync(c => c.Id == id);
 
         // If no customer found, create a new customer object with user data
-        if (customer == null)
+        //if (customer == null)
+        //{
+        //    customer = new Customer
+        //    {
+        //        Id = id,
+        //       // UserId = user.Id,
+        //    };
+        //}
+
+        //if (customer != null)
+        //{
+        //    var options = new DistributedCacheEntryOptions()
+        //        .SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Adjust the expiration policy
+        //    await _distributedCache.SetStringAsync(cacheKey, JsonSerializer.Serialize(customer), options);
+        //}
+
+        using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
         {
-            customer = new Customer
-            {
-                Id = id,
-               // UserId = user.Id,
-            };
+            var customer = await _customerRepository
+            .FirstOrDefaultAsync(c => c.Id == id);
+            return customer;
         }
-       
-        if (customer != null)
-        {
-            var options = new DistributedCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(30)); // Adjust the expiration policy
-            await _distributedCache.SetStringAsync(cacheKey, JsonSerializer.Serialize(customer), options);
-        }
-        
-        return customer;
     }
 
     public async Task UpdateAsync(Customer customer)
