@@ -589,7 +589,7 @@ namespace Webminux.Optician.Customers
                 query = query.Where(c => c.UserId == input.CustomerUserId);
             }
 
-            if (input.TenantId > 0 && tenancyName != "5000")
+            if (input.TenantId > 0)
             {
                 query = query.Where(c => c.TenantId == input.TenantId);
             }
