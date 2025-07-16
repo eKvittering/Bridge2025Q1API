@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CustomFields\Dtos\" />
+    <Folder Include="SynTableData\Dto\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Abp.HangFire.AspNetCore" Version="6.6.2" />
