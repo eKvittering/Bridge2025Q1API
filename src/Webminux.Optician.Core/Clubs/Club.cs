@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Webminux.Optician.Clubs
 {
-    public class Club
+    public class Club : Entity
     {
         /// <summary>
         /// Unique identifier for the club (auto-incremented).
@@ -37,6 +38,7 @@ namespace Webminux.Optician.Clubs
         /// Foreign key reference to the user-specific table or record.
         /// </summary>
         public int UserDbTableNameId { get; set; }
+
     }
 
 }
