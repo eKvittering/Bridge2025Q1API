@@ -24,8 +24,12 @@ using Webminux.Optician.Companies;
 using Webminux.Optician.Core;
 using Webminux.Optician.CustomFields;
 using Webminux.Optician.Editions;
+using Webminux.Optician.Faults.Dtos;
+using Webminux.Optician.Faults;
 using Webminux.Optician.Helpers;
 using Webminux.Optician.MultiTenancy.Dto;
+using Webminux.Optician.Tickets.Dtos;
+using Webminux.Optician.Tickets;
 using static Webminux.Optician.OpticianConsts;
 
 namespace Webminux.Optician.MultiTenancy
@@ -44,6 +48,7 @@ namespace Webminux.Optician.MultiTenancy
         private readonly IConfiguration _configuration;
         private readonly IRepository<CustomField> _customFieldRepository;
         private readonly IRepository<TenantMedia> _tenantMediaRepository;
+        private readonly IRepository<Tenant, int> _repository;
         public TenantAppService(
             IRepository<Tenant, int> repository,
             TenantManager tenantManager,
@@ -70,6 +75,7 @@ namespace Webminux.Optician.MultiTenancy
             _configuration = configuration;
             _customFieldRepository = customFieldRepository;
             _tenantMediaRepository = tenantMediaRepository;
+            _repository = repository;
         }
 
         public override async Task<TenantDto> CreateAsync(CreateTenantDto input)
@@ -407,6 +413,67 @@ namespace Webminux.Optician.MultiTenancy
 
             return dto;
         }
+
+        #region GetTicketById
+        /// <summary>
+        /// Get Ticket by Id
+        /// </summary>
+        /// <param name="input">Id of Ticket</param>
+        /// <returns></returns>
+        public async Task<TenantDto> GetTenantByIdAsync(int id)
+        {
+            try
+            {
+                using (UnitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant, AbpDataFilters.MustHaveTenant))
+                {
+                    var tenantDetail = await _repository.GetAll().Include(x=>x.Company).Where(x=>x.Id == id).FirstOrDefaultAsync();
+                    return MapToEntityDto(tenantDetail);
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+
+        private static ActivityListDto GetActivityDto(Activity a)
+        {
+            return new ActivityListDto()
+            {
+                Id = a.Id,
+                Name = a.Name,
+                //CustomerId = a.Customer != null ? a.Customer.Customer.Id : null,
+                //CustomerUserId = a.CustomerId,
+                //CustomerName = a.Customer != null ? a.Customer.FullName : string.Empty,
+                //CustomerEmail = a.Customer != null ? a.Customer.EmailAddress : string.Empty,
+                ActivityTypeId = a.ActivityTypeId,
+                //ActivityTypeName = a.ActivityType.Name,
+                //ActivityArtId = a.ActivityArtId,
+                //ActivityArtName = a.ActivityArt.Name,
+                Date = a.Date,
+                FollowUpDate = a.FollowUpDate,
+                //FollowUpTypeName = a.FollowUpActivityType.Name,
+                FollowUpTypeId = a.FollowUpTypeId,
+                // CreationTime = a.CreationTime,
+                // CreatorUserId = a.CreatorUserId,
+                //EmployeeId = a.UserId,
+                //EmployeeName = a.User.FullName,
+                IsFollowUp = a.IsFollowUp,
+                //FollowUpByEmployeeId = a.FollowUpByEmployeeId,
+                //RoomId = a.RoomId,
+                //RoomName = a.Room != null ? a.Room.Name : string.Empty,
+                //ProductItemId = a.ProductItem != null ? a.ProductItem.Id : null,
+                //ProductSerialNumber = a.ProductItem != null ? a.ProductItem.SerialNumber : string.Empty,
+                //ProductName = a.ProductItem != null ? a.ProductItem.Product.Name : string.Empty,
+                //ProductNumber = a.ProductItem != null ? a.ProductItem.Product.ProductNumber : string.Empty,
+                //SupplierId = a.ProductItem != null ? a.ProductItem.Product.SupplierId : null,
+                //SupplierName = a.ProductItem != null ? a.ProductItem.Product.Supplier != null ? a.ProductItem.Product.Supplier.User.Name : string.Empty : string.Empty,
+                //GroupName = a.Group.Id > 0 ? a.Group.Name : string.Empty
+            };
+        }
+
+        #endregion
     }
 }
 

@@ -10,6 +10,7 @@ namespace Webminux.Optician.MultiTenancy
     {
         Task<PagedResultDto<TenantDto>> GetPagedTenantsAsync(PagedTenantResultRequestDto input);
         Task<TenantMediaDto> GetTenantMediaInfoAsync(string tenancyName);
+        Task<TenantDto> GetTenantByIdAsync(int id);
     }
 }
 
