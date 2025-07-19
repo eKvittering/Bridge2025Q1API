@@ -49,12 +49,14 @@ namespace Webminux.Optician.MultiTenancy
         private readonly IRepository<CustomField> _customFieldRepository;
         private readonly IRepository<TenantMedia> _tenantMediaRepository;
         private readonly IRepository<Tenant, int> _repository;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
         public TenantAppService(
             IRepository<Tenant, int> repository,
             TenantManager tenantManager,
             EditionManager editionManager,
             UserManager userManager,
             RoleManager roleManager,
+             IUnitOfWorkManager unitOfWorkManager,
             IRepository<UserType> userTypeRepository,
             IAbpZeroDbMigrator abpZeroDbMigrator,
             CompanyManager companyManager,
@@ -76,6 +78,7 @@ namespace Webminux.Optician.MultiTenancy
             _customFieldRepository = customFieldRepository;
             _tenantMediaRepository = tenantMediaRepository;
             _repository = repository;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         public override async Task<TenantDto> CreateAsync(CreateTenantDto input)
@@ -139,16 +142,20 @@ namespace Webminux.Optician.MultiTenancy
             var tenant = await _tenantManager.GetByIdAsync(input.Id);
 
             ObjectMapper.Map(input, tenant);
-
-            var company = await _companyManager.GetAsync(input.CompanyId);
-
-            MediaUploadDto logoUploadResult = null;
-            if (string.IsNullOrWhiteSpace(input.Base64Logo) == false)
+            using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
             {
-                await DeleteOldLogoAsync(company);
-                logoUploadResult = await UploadLogoToCloudAsyc(input.Base64Logo);
+                var company = await _companyManager.GetAsync(input.CompanyId);
+
+                MediaUploadDto logoUploadResult = null;
+                if (string.IsNullOrWhiteSpace(input.Base64Logo) == false)
+                {
+                    await DeleteOldLogoAsync(company);
+                    logoUploadResult = await UploadLogoToCloudAsyc(input.Base64Logo);
+                }
+                MapUpdateTenantDtoToCompany(input, company, logoUploadResult);
             }
-            MapUpdateTenantDtoToCompany(input, company, logoUploadResult);
+
+               
 
             await UpdateExistingAndAddNewOneAsync(input);
             await CurrentUnitOfWork.SaveChangesAsync();

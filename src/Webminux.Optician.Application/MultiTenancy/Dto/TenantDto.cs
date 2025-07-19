@@ -9,7 +9,7 @@ namespace Webminux.Optician.MultiTenancy.Dto
     {
         [Required]
         [StringLength(AbpTenantBase.MaxTenancyNameLength)]
-        [RegularExpression(AbpTenantBase.TenancyNameRegex)]
+        //[RegularExpression(AbpTenantBase.TenancyNameRegex)]
         public string TenancyName { get; set; }
 
         [Required]
