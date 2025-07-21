@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Webminux.Optician.Medlemmers
+namespace Webminux.Optician
 {
-    public class Medlem
+    public class MEDLEMMER
     {
         /// <summary>
         /// Unique identifier (may not be primary key).

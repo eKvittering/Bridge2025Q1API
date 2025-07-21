@@ -84,6 +84,7 @@ namespace Webminux.Optician.EntityFrameworkCore
         public DbSet<Webminux.Optician.Package.Pacakge> Packages { get; set; }
         public DbSet<Webminux.Optician.SubPackage.SubPackage> SubPackages { get; set; }
         public DbSet<SyncHistoryDetail> SyncHistoryDetails { get; set; }
+        public DbSet<UserTenant> UserTenants { get; set; }
 
 
         public OpticianDbContext(DbContextOptions<OpticianDbContext> options)

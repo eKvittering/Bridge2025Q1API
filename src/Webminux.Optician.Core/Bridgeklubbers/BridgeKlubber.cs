@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Webminux.Optician.Bridgeklubbers
+namespace Webminux.Optician
 {
-    public class BridgeKlub
+    public class BRIDGEKLUBBER:Entity
     {
         /// <summary>
         /// Unique identifier (not necessarily a primary key).

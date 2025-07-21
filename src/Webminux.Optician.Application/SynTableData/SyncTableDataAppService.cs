@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Webminux.Optician.Clubs;
+using Webminux.Optician;
 using Webminux.Optician.Companies;
 using Webminux.Optician.MultiTenancy;
 
@@ -16,10 +16,10 @@ namespace Webminux.Optician.SynTableData
     public class SyncTableDataAppService : OpticianAppServiceBase, ISyncTableDataAppService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
-        private readonly IRepository<Club> _clubRepository;
+        private readonly IRepository<BRIDGEKLUBBER> _clubRepository;
         private readonly IRepository<Tenant> _tenantRepository;
 
-        public SyncTableDataAppService(IUnitOfWorkManager unitOfWorkManager, IRepository<Club> clubRepository, IRepository<Tenant> tenantRepository)
+        public SyncTableDataAppService(IUnitOfWorkManager unitOfWorkManager, IRepository<BRIDGEKLUBBER> clubRepository, IRepository<Tenant> tenantRepository)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _clubRepository = clubRepository;
@@ -38,21 +38,21 @@ namespace Webminux.Optician.SynTableData
 
                 foreach (var club in clubs)
                 {
-                    var existingTenant = await _tenantRepository
-                        .FirstOrDefaultAsync(t => t.Name.ToLower() == club.Name.ToLower());
-                    if (existingTenant == null)
-                    {
-                        var newTenant = new Tenant
-                        {
-                            Name = club.Name,
-                            TenancyName = club.Name,
-                            IsActive = true,
-                            IsDeleted = false,
-                            CreationTime = DateTime.UtcNow,
-                        };
+                    //var existingTenant = await _tenantRepository
+                    //    .FirstOrDefaultAsync(t => t.TenancyName.ToLower() == club.Name.ToLower());
+                    //if (existingTenant == null)
+                    //{
+                    //    var newTenant = new Tenant
+                    //    {
+                    //        Name = club.Name,
+                    //        TenancyName = club.Name,
+                    //        IsActive = true,
+                    //        IsDeleted = false,
+                    //        CreationTime = DateTime.UtcNow,
+                    //    };
 
-                        await _tenantRepository.InsertAsync(newTenant);
-                    }
+                    //    await _tenantRepository.InsertAsync(newTenant);
+                    //}
                 }
                 await unitOfWork.CompleteAsync();
             }
