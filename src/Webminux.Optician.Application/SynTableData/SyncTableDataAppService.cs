@@ -16,10 +16,12 @@ namespace Webminux.Optician.SynTableData
     public class SyncTableDataAppService : OpticianAppServiceBase, ISyncTableDataAppService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
-        private readonly IRepository<BRIDGEKLUBBER> _clubRepository;
+        private readonly IRepository<BRIDGEKLUBBER> _BRIDGEKLUBBERRepository;
+        private readonly IRepository<MEDLEMMER> _MEDLEMMERRepository;
+        private readonly IRepository<MEDLEMSKABER> _MEDLEMSKABERRepository;
         private readonly IRepository<Tenant> _tenantRepository;
 
-        public SyncTableDataAppService(IUnitOfWorkManager unitOfWorkManager, IRepository<BRIDGEKLUBBER> clubRepository, IRepository<Tenant> tenantRepository)
+        public SyncTableDataAppService(IUnitOfWorkManager unitOfWorkManager, IRepository<BRIDGEKLUBBER> BRIDGEKLUBBERRepository, IRepository<Tenant> tenantRepository)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _clubRepository = clubRepository;

@@ -86,6 +86,13 @@ namespace Webminux.Optician.EntityFrameworkCore
         public DbSet<SyncHistoryDetail> SyncHistoryDetails { get; set; }
         public DbSet<UserTenant> UserTenants { get; set; }
 
+        //Clients data tables
+        public DbSet<MEDLEMMER> MEDLEMMER { get; set; }
+        public DbSet<MEDLEMSKABER> MEDLEMSKABER { get; set; }
+        public DbSet<BRIDGEKLUBBER> BRIDGEKLUBBER { get; set; }
+        
+        //End
+
 
         public OpticianDbContext(DbContextOptions<OpticianDbContext> options)
             : base(options)

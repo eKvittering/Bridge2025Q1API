@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Abp.Domain.Entities;
 
 namespace Webminux.Optician
 {
-    public class MEDLEMMER
+    public class MEDLEMMER:Entity
     {
         /// <summary>
         /// Unique identifier (may not be primary key).
