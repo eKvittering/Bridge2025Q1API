@@ -26,7 +26,7 @@ namespace Webminux.Optician
         public virtual int TenantId { get; set; }
         public virtual Tenant Tenant { get; set; }
 
-        protected UserTenant() { }
+        public UserTenant() { }
 
         public static UserTenant Create(int tenantId, int userId)
         {
