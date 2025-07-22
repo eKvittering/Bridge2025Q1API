@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Abp.Application.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace Webminux.Optician.SynTableData
 {
-    public interface ISyncTableDataAppService
+    /// <summary>
+    /// This is an application service class for <see cref="SyncTableDataAppService"/> entity.
+    /// </summary>
+    public interface ISyncTableDataAppService : IApplicationService
     {
-        Task<bool> InitializeSync();
+        /// <summary>
+        /// This is an application service class for Import Data for Clubs and Members.
+        /// </summary>
+        Task<bool> ImportData();
     }
 }

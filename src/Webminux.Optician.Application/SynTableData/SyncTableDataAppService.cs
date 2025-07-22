@@ -20,6 +20,9 @@ using Webminux.Optician.MultiTenancy;
 
 namespace Webminux.Optician.SynTableData
 {
+    /// <summary>
+    /// This is an application service class for <see cref="SyncTableDataAppService"/> entity.
+    /// </summary>
     public class SyncTableDataAppService : OpticianAppServiceBase, ISyncTableDataAppService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -32,7 +35,9 @@ namespace Webminux.Optician.SynTableData
         internal readonly UserManager _userManager;
         internal readonly IRepository<UserType, int> _userTypeRepository;
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SyncTableDataAppService"/> class.
+        /// </summary>
         public SyncTableDataAppService(IUnitOfWorkManager unitOfWorkManager,
             IRepository<MEDLEMMER> MEDLEMMERRepository, IRepository<MEDLEMSKABER> MEDLEMSKABERRepository,
         IRepository<BRIDGEKLUBBER> BRIDGEKLUBBERRepository, IRepository<Tenant> tenantRepository,
@@ -50,12 +55,10 @@ namespace Webminux.Optician.SynTableData
             _userManager = userManager;
             _userTypeRepository = userTypeRepository;
         }
-        public Task<bool> InitializeSync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task ImportClubs()
+        /// <summary>
+        /// This is an application service class for Import Data for Clubs and Members.
+        /// </summary>
+        public async Task<bool> ImportData()
         {
             var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
             var userId = AbpSession.UserId.Value;
@@ -175,6 +178,8 @@ namespace Webminux.Optician.SynTableData
 
                 await unitOfWork.CompleteAsync();
             }
+
+            return true;
         }
 
         public static Tenant MapBridgeKlubberToTenant(BRIDGEKLUBBER bridgeKlubber,long userId)
