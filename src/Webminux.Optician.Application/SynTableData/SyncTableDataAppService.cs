@@ -1,4 +1,5 @@
 ﻿using Abp;
+using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,7 @@ namespace Webminux.Optician.SynTableData
     /// <summary>
     /// This is an application service class for <see cref="SyncTableDataAppService"/> entity.
     /// </summary>
+    [AbpAuthorize]
     public class SyncTableDataAppService : OpticianAppServiceBase, ISyncTableDataAppService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
