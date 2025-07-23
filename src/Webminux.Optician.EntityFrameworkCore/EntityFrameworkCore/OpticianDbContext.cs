@@ -90,7 +90,7 @@ namespace Webminux.Optician.EntityFrameworkCore
         public DbSet<MEDLEMMER> MEDLEMMER { get; set; }
         public DbSet<MEDLEMSKABER> MEDLEMSKABER { get; set; }
         public DbSet<BRIDGEKLUBBER> BRIDGEKLUBBER { get; set; }
-        
+
         //End
 
 

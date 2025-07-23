@@ -18,13 +18,14 @@ using Webminux.Optician.Core;
 using Webminux.Optician.Core.Customers;
 using Webminux.Optician.Core.Notes;
 using Webminux.Optician.MultiTenancy;
+using static AutoMapper.Internal.ExpressionFactory;
 
 namespace Webminux.Optician.SynTableData
 {
     /// <summary>
     /// This is an application service class for <see cref="SyncTableDataAppService"/> entity.
     /// </summary>
-    [AbpAuthorize]
+    //[AbpAuthorize]
     public class SyncTableDataAppService : OpticianAppServiceBase, ISyncTableDataAppService
     {
         private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -50,7 +51,7 @@ namespace Webminux.Optician.SynTableData
             _unitOfWorkManager = unitOfWorkManager;
             _BRIDGEKLUBBERRepository = BRIDGEKLUBBERRepository;
             _MEDLEMMERRepository = MEDLEMMERRepository;
-            _MEDLEMSKABERRepository = MEDLEMSKABERRepository;   
+            _MEDLEMSKABERRepository = MEDLEMSKABERRepository;
             _tenantRepository = tenantRepository;
             _customerRepository = customerRepository;
             _userTenantRepository = userTenantRepository;
@@ -62,133 +63,179 @@ namespace Webminux.Optician.SynTableData
         /// </summary>
         public async Task<bool> ImportData()
         {
-            var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
-            var userId = AbpSession.UserId.Value;
-            using (var unitOfWork = _unitOfWorkManager.Begin())
+            try
             {
-                var clientClubs = await _BRIDGEKLUBBERRepository.GetAllListAsync();
-                var clientMembers = await _MEDLEMMERRepository.GetAllListAsync();
-                var clientClubMembers = await _MEDLEMSKABERRepository.GetAllListAsync();
-
-                foreach (var club in clientClubs)
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
                 {
-                    var existingTenant = await _tenantRepository
-                        .FirstOrDefaultAsync(t => t.TenancyName.ToLower() == club.NAVN.ToLower());
-                    if (existingTenant == null)
+                    var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
+                    var userId = 5;//AbpSession.UserId.Value;
+                    
+                    //using (var unitOfWork = _unitOfWorkManager.Begin())
+                    //{
+                   
+                    var clientClubs = await _BRIDGEKLUBBERRepository.GetAllListAsync();
+                    var clientMembers = await _MEDLEMMERRepository.GetAllListAsync();
+                    var clientClubMembers = await _MEDLEMSKABERRepository.GetAllListAsync();
+
+                    foreach (var club in clientClubs)
                     {
-                        var newTenant = MapBridgeKlubberToTenant(club, userId);
-
-                        await _tenantRepository.InsertAsync(newTenant);
-                        await _unitOfWorkManager.Current.SaveChangesAsync();
-                    }
-                }
-
-
-                foreach (var member in clientMembers)
-                {
-                    var clientMemberTenant = await _MEDLEMSKABERRepository.FirstOrDefaultAsync(x => x.FKMEDLEMSID == member.ID);
-                    var clientTenant = await _BRIDGEKLUBBERRepository.FirstOrDefaultAsync(x => x.ID == clientMemberTenant.FKBRIDGEKLUBID);
-                    var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.TenancyName == clientTenant.NAVN);
-                    var existingMember = await _customerRepository
-                        .FirstOrDefaultAsync(t => t.CustomerNo.ToLower() == member.NUMMER.ToString().ToLower());
-
-
-
-                    if (existingMember == null)
-                    {
-                        var clientCustomer = MapToCustomer(member, userId, tenant.Id);
-
-                       // var input = _objectMapper.Map<CreateCustomerDto>(economicCustomer);
-                        //input.Password = "Dummy@123"; // Default password for new users
-                        //input.EmailAddress = !string.IsNullOrWhiteSpace(input.EmailAddress)
-                        //    ? input.EmailAddress
-                        //    : $"{input.CustomerNo + args.TenantId}@e-conomic.com";
-                        //input.UserName = input.EmailAddress;
-
-                        User newUser = null; // Variable to hold the new user
-
-                        // Check if a user with the same email already exists
-                        var userDbo = _userManager.Users.FirstOrDefault(x => x.EmailAddress == clientCustomer.EMAIL);
-
-                        if (userDbo == null)
+                        try
                         {
-                            // User doesn't exist, create a new user
-                            //newUser = _objectMapper.Map<User>(input);
-                            newUser.UserTypeId = userTypeId;
-                            newUser.Password = "Secure$888";
-                            newUser.EmailAddress = clientCustomer.EMAIL;
-                            newUser.UserName = clientCustomer.EMAIL;
-                            newUser.CreationTime = DateTime.UtcNow;
-                            newUser.CreatorUserId = userId;
+                            var existingTenant = _tenantRepository
+                            .GetAll().Where(t => t.TenancyName.ToLower() == club.NAVN.ToLower()).FirstOrDefault();
+                            if (existingTenant == null)
+                            {
+                              
+                                var newTenant = MapBridgeKlubberToTenant(club, userId);
 
-                            newUser.Name = clientCustomer.FORNAVN;
-                            newUser.Surname = clientCustomer.EFTERNAVN;
-                            newUser.TenantId = tenant.Id;
-                            newUser.IsActive = true;
+                                using (var uow = _unitOfWorkManager.Begin(new UnitOfWorkOptions { IsTransactional = false }))
+                                {
+                                    await _tenantRepository.InsertAsync(newTenant);
+                                    await _unitOfWorkManager.Current.SaveChangesAsync();
+                                    await uow.CompleteAsync();
+                                }
 
-                            // Create and save the new user
-                            await _userManager.CreateAsync(newUser, newUser.Password);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+
+                            throw;
+                        }
+
+                    }
+
+
+                    foreach (var item in clientClubMembers)
+                    {
+                        var clientTenant = clientClubs.FirstOrDefault(x => x.ID == item.FKBRIDGEKLUBID);
+                        if (clientTenant == null)
+                        {
+                            continue;
+                        }
+
+                        var clientMember = clientMembers.FirstOrDefault(x => x.ID == item.FKMEDLEMSID);
+                        if (clientMember == null)
+                        {
+                            continue;
+                        }
+
+                        var tenant = await _tenantRepository.FirstOrDefaultAsync(x => x.TenancyName == clientTenant.NAVN);
+                        if (tenant == null)
+                        {
+                            continue;
+                        }
+
+
+                        var existingMember = await _customerRepository
+                           .FirstOrDefaultAsync(t => t.CustomerNo.ToLower() == clientMember.NUMMER.ToString().ToLower());
+
+                        if (existingMember == null)
+                        {
+                            var clientCustomer = MapToCustomer(clientMember, userId, tenant.Id);
+
+                            // var input = _objectMapper.Map<CreateCustomerDto>(economicCustomer);
+                            //input.Password = "Dummy@123"; // Default password for new users
+                            //input.EmailAddress = !string.IsNullOrWhiteSpace(input.EmailAddress)
+                            //    ? input.EmailAddress
+                            //    : $"{input.CustomerNo + args.TenantId}@e-conomic.com";
+                            //input.UserName = input.EmailAddress;
+
+                            User newUser = null; // Variable to hold the new user
+
+                            // Check if a user with the same email already exists
+                            var userDbo = _userManager.Users.FirstOrDefault(x => x.EmailAddress == clientCustomer.EMAIL);
+
+                            if (userDbo == null)
+                            {
+                                // User doesn't exist, create a new user
+                                //newUser = _objectMapper.Map<User>(input);
+                                newUser.UserTypeId = userTypeId;
+                                newUser.Password = "Secure$888";
+                                newUser.EmailAddress = clientCustomer.EMAIL;
+                                newUser.UserName = clientCustomer.EMAIL;
+                                newUser.CreationTime = DateTime.UtcNow;
+                                newUser.CreatorUserId = userId;
+
+                                newUser.Name = clientCustomer.FORNAVN;
+                                newUser.Surname = clientCustomer.EFTERNAVN;
+                                newUser.TenantId = tenant.Id;
+                                newUser.IsActive = true;
+
+                                // Create and save the new user
+                                await _userManager.CreateAsync(newUser, newUser.Password);
+                                await _unitOfWorkManager.Current.SaveChangesAsync();
+
+                                // Fetch the newly created user
+                                newUser = _userManager.Users.OrderByDescending(x => x.Id).FirstOrDefault();
+                            }
+                            else
+                            {
+                                // If user exists, assign the existing user to newUser
+                                newUser = userDbo;
+                            }
+
+                            // Check if the customer is already associated with the user
+                            //if (_customerRepository.FirstOrDefault(x => x.UserId == newUser.Id) == null)
+                            //{
+                            //    // Create and insert the new customer
+                            //    var customer = Customer.Create(args.TenantId,
+                            //        clientCustomer.CustomerNo,
+                            //        clientCustomer.Address ?? "",
+                            //        clientCustomer.Postcode ?? "",
+                            //        clientCustomer.TownCity ?? "",
+                            //        clientCustomer.Country ?? "",
+                            //        clientCustomer.TelephoneFax ?? "",
+                            //        clientCustomer.Website ?? "",
+                            //        clientCustomer.Currency ?? "",
+                            //        newUser.Id, // Associate the user with the customer
+                            //        newUser.Id,
+                            //        1,
+                            //        null,
+                            //        false,
+                            //        string.Empty);
+
+                            //    _customerRepository.Insert(customer);
+                            //}
+
+                            clientCustomer.UserId = newUser.Id;
+                            await _customerRepository.InsertAsync(clientCustomer);
                             await _unitOfWorkManager.Current.SaveChangesAsync();
 
-                            // Fetch the newly created user
-                            newUser = _userManager.Users.OrderByDescending(x => x.Id).FirstOrDefault();
+
+
+                            var userTenant = new UserTenant();
+                            userTenant.TenantId = tenant.Id;
+                            userTenant.UserId = newUser.Id;
+
+                            await _userTenantRepository.InsertAsync(userTenant);
+                            await _unitOfWorkManager.Current.SaveChangesAsync();
+
                         }
-                        else
-                        {
-                            // If user exists, assign the existing user to newUser
-                            newUser = userDbo;
-                        }
-
-                              // Check if the customer is already associated with the user
-                        //if (_customerRepository.FirstOrDefault(x => x.UserId == newUser.Id) == null)
-                        //{
-                        //    // Create and insert the new customer
-                        //    var customer = Customer.Create(args.TenantId,
-                        //        clientCustomer.CustomerNo,
-                        //        clientCustomer.Address ?? "",
-                        //        clientCustomer.Postcode ?? "",
-                        //        clientCustomer.TownCity ?? "",
-                        //        clientCustomer.Country ?? "",
-                        //        clientCustomer.TelephoneFax ?? "",
-                        //        clientCustomer.Website ?? "",
-                        //        clientCustomer.Currency ?? "",
-                        //        newUser.Id, // Associate the user with the customer
-                        //        newUser.Id,
-                        //        1,
-                        //        null,
-                        //        false,
-                        //        string.Empty);
-
-                        //    _customerRepository.Insert(customer);
-                        //}
-
-                        clientCustomer.UserId = newUser.Id;
-                        await _customerRepository.InsertAsync(clientCustomer);
-                        await _unitOfWorkManager.Current.SaveChangesAsync();
 
 
-
-
-                        var userTenant = new UserTenant();
-                        userTenant.TenantId = tenant.Id;
-                        userTenant.UserId = newUser.Id;
-
-                        await _userTenantRepository.InsertAsync(userTenant);
-                        await _unitOfWorkManager.Current.SaveChangesAsync();
                     }
+
+
+                    //    await unitOfWork.CompleteAsync();
+                    //}
                 }
 
-                await unitOfWork.CompleteAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+
+                throw;
             }
 
-            return true;
         }
 
-        public static Tenant MapBridgeKlubberToTenant(BRIDGEKLUBBER bridgeKlubber,long userId)
+        public static Tenant MapBridgeKlubberToTenant(BRIDGEKLUBBER bridgeKlubber, long userId)
         {
             var tenant = new Tenant();
             tenant.IsActive = true;
-            tenant.IsDeleted = true;
+            tenant.IsDeleted = false;
 
             // Map the Club Number
             tenant.Klubnummer = bridgeKlubber.KLUBNUMMER;
@@ -198,6 +245,7 @@ namespace Webminux.Optician.SynTableData
 
             // Map the Club Name
             tenant.Name = bridgeKlubber.NAVN;
+            tenant.TenancyName = bridgeKlubber.NAVN;
 
             // Map the Created Date
             tenant.CreationTime = bridgeKlubber.OPRETTET ?? DateTime.UtcNow;

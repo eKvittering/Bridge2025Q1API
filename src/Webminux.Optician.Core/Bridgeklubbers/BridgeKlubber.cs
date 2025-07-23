@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Webminux.Optician
 {
@@ -13,6 +14,8 @@ namespace Webminux.Optician
         /// <summary>
         /// Unique identifier (not necessarily a primary key).
         /// </summary>
+        /// 
+        [Key]
         public int? ID { get; set; }
 
         /// <summary>

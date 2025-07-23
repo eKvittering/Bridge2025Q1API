@@ -1,6 +1,7 @@
 ﻿using Abp.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,7 +10,9 @@ namespace Webminux.Optician
 {
     public class MEDLEMSKABER : Entity
     {
+
         // ID
+        [Key]
         public int? ID { get; set; }
 
         // Bridge Club ID (Foreign Key)
