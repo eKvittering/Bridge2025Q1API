@@ -1,28 +1,17 @@
-﻿using Abp;
-using Abp.Authorization;
+﻿
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Webminux.Optician;
-using Webminux.Optician.Application.Customers.Dtos;
 using Webminux.Optician.Authorization.Users;
-using Webminux.Optician.Companies;
 using Webminux.Optician.Core;
 using Webminux.Optician.Core.Customers;
 using Webminux.Optician.Core.Notes;
 using Webminux.Optician.MultiTenancy;
-using static AutoMapper.Internal.ExpressionFactory;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static Webminux.Optician.Authorization.Roles.StaticRoleNames;
 
 namespace Webminux.Optician.SynTableData
 {
