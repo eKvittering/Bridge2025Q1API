@@ -7,6 +7,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ using Webminux.Optician.Core.Customers;
 using Webminux.Optician.Core.Notes;
 using Webminux.Optician.MultiTenancy;
 using static AutoMapper.Internal.ExpressionFactory;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using static Webminux.Optician.Authorization.Roles.StaticRoleNames;
 
 namespace Webminux.Optician.SynTableData
 {
@@ -71,11 +74,10 @@ namespace Webminux.Optician.SynTableData
                 {
                     var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
                     var userId = AbpSession.UserId ?? 1;
-                    
+
                     var clientClubs = await _BRIDGEKLUBBERRepository.GetAllListAsync();
                     var clientMembers = await _MEDLEMMERRepository.GetAllListAsync();
                     var clientClubMembers = await _MEDLEMSKABERRepository.GetAllListAsync();
-
 
 
                     foreach (var item in clientClubMembers)
@@ -86,8 +88,8 @@ namespace Webminux.Optician.SynTableData
                             continue;
                         }
 
-                        var clientMember = clientMembers.FirstOrDefault(x => x.ID == item.FKMEDLEMSID);
-                        if (clientMember == null)
+                        var member = clientMembers.FirstOrDefault(x => x.ID == item.FKMEDLEMSID);
+                        if (member == null)
                         {
                             continue;
                         }
@@ -100,44 +102,18 @@ namespace Webminux.Optician.SynTableData
 
 
                         var existingMember = await _customerRepository
-                           .FirstOrDefaultAsync(t => t.CustomerNo.ToLower() == clientMember.NUMMER.ToString().ToLower());
+                           .FirstOrDefaultAsync(t => t.CustomerNo.ToLower() == member.NUMMER.ToString().ToLower());
 
                         if (existingMember == null)
                         {
-                            var clientCustomer = MapToCustomer(clientMember, userId, tenant.Id);
-
-                            // var input = _objectMapper.Map<CreateCustomerDto>(economicCustomer);
-                            //input.Password = "Dummy@123"; // Default password for new users
-                            //input.EmailAddress = !string.IsNullOrWhiteSpace(input.EmailAddress)
-                            //    ? input.EmailAddress
-                            //    : $"{input.CustomerNo + args.TenantId}@e-conomic.com";
-                            //input.UserName = input.EmailAddress;
-
                             User newUser = null; // Variable to hold the new user
 
                             // Check if a user with the same email already exists
-                            var userDbo = _userManager.Users.FirstOrDefault(x => x.EmailAddress == clientCustomer.EMAIL);
+                            var userDbo = _userManager.Users.FirstOrDefault(x => x.EmailAddress == member.EMAIL);
 
                             if (userDbo == null)
                             {
-                                // User doesn't exist, create a new user
-                                //newUser = _objectMapper.Map<User>(input);
-                                newUser.UserTypeId = userTypeId;
-                                newUser.Password = "Secure$888";
-                                newUser.EmailAddress = clientCustomer.EMAIL;
-                                newUser.UserName = clientCustomer.EMAIL;
-                                newUser.CreationTime = DateTime.UtcNow;
-                                newUser.CreatorUserId = userId;
-
-                                newUser.Name = clientCustomer.FORNAVN;
-                                newUser.Surname = clientCustomer.EFTERNAVN;
-                                newUser.TenantId = tenant.Id;
-                                newUser.IsActive = true;
-
-                                // Create and save the new user
-                                await _userManager.CreateAsync(newUser, newUser.Password);
-                                await _unitOfWorkManager.Current.SaveChangesAsync();
-
+                                await InsertUserRecord(userTypeId, userId, member, tenant);
                                 // Fetch the newly created user
                                 newUser = _userManager.Users.OrderByDescending(x => x.Id).FirstOrDefault();
                             }
@@ -147,52 +123,13 @@ namespace Webminux.Optician.SynTableData
                                 newUser = userDbo;
                             }
 
-                            // Check if the customer is already associated with the user
-                            //if (_customerRepository.FirstOrDefault(x => x.UserId == newUser.Id) == null)
-                            //{
-                            //    // Create and insert the new customer
-                            //    var customer = Customer.Create(args.TenantId,
-                            //        clientCustomer.CustomerNo,
-                            //        clientCustomer.Address ?? "",
-                            //        clientCustomer.Postcode ?? "",
-                            //        clientCustomer.TownCity ?? "",
-                            //        clientCustomer.Country ?? "",
-                            //        clientCustomer.TelephoneFax ?? "",
-                            //        clientCustomer.Website ?? "",
-                            //        clientCustomer.Currency ?? "",
-                            //        newUser.Id, // Associate the user with the customer
-                            //        newUser.Id,
-                            //        1,
-                            //        null,
-                            //        false,
-                            //        string.Empty);
-
-                            //    _customerRepository.Insert(customer);
-                            //}
-
-                            clientCustomer.UserId = newUser.Id;
-
-
-                            await _customerRepository.InsertAsync(clientCustomer);
-                            await _unitOfWorkManager.Current.SaveChangesAsync();
-
-
-
-                            var userTenant = new UserTenant();
-                            userTenant.TenantId = tenant.Id;
-                            userTenant.UserId = newUser.Id;
-
-                            await _userTenantRepository.InsertAsync(userTenant);
-                            await _unitOfWorkManager.Current.SaveChangesAsync();
+                            await InsertCustomerRecord(userId, member, tenant);
+                            await InsertUserTenantRecord(tenant, newUser);
 
                         }
 
 
                     }
-
-
-                    //    await unitOfWork.CompleteAsync();
-                    //}
                 }
 
                 return true;
@@ -203,6 +140,157 @@ namespace Webminux.Optician.SynTableData
                 throw;
             }
 
+        }
+
+        private async Task InsertUserRecord(int userTypeId, long userId, MEDLEMMER member, Tenant tenant)
+        {
+            using (var connection = new SqlConnection(_conn))
+            {
+                await connection.OpenAsync();
+
+                var insertCommand = new SqlCommand(@"
+                                                INSERT INTO AbpUsers (
+                                                    UserTypeId, Password, EmailAddress, UserName, CreationTime, CreatorUserId,
+                                                    Name, Surname, TenantId, IsActive,IsDeleted,AccessFailedCount,IsLockoutEnabled,
+                                                   IsPhoneNumberConfirmed,IsTwoFactorEnabled,IsEmailConfirmed,NormalizedUserName ,NormalizedEmailAddress,
+                                                    CanAnswerPhoneCalls,CanOpenCloseShop,IsReceptionAllowed,IsResponsibleForStocks,IsAdmin
+                                                )
+                                                VALUES (
+                                                    @UserTypeId, @Password, @EmailAddress, @UserName, @CreationTime, @CreatorUserId,
+                                                    @Name, @Surname, @TenantId, @IsActive,@IsDeleted,@AccessFailedCount,@IsLockoutEnabled,
+                                                       @IsPhoneNumberConfirmed,@IsTwoFactorEnabled,@IsEmailConfirmed,@NormalizedUserName,@NormalizedEmailAddress,@CanAnswerPhoneCalls
+                                                    ,@CanOpenCloseShop,@IsReceptionAllowed,@IsResponsibleForStocks,@IsAdmin
+                                                )", connection);
+
+                // Add parameters
+                insertCommand.Parameters.AddWithValue("@UserTypeId", userTypeId);
+                insertCommand.Parameters.AddWithValue("@Password", "AQAAAAEAACcQAAAAEOAjE4XA68JRcZDqTtjwDoMhTRgyy9dookaozUJ3hXTWsMFHhN6GrzDv2GKwh01wuQ=="); // 🔐 Consider hashing
+                insertCommand.Parameters.AddWithValue("@EmailAddress", member.EMAIL ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@UserName", member.EMAIL ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@CreationTime", DateTime.UtcNow);
+                insertCommand.Parameters.AddWithValue("@CreatorUserId", userId);
+                insertCommand.Parameters.AddWithValue("@Name", member.FORNAVN ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Surname", member.EFTERNAVN ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@TenantId", tenant.Id);
+                insertCommand.Parameters.AddWithValue("@IsActive", true);
+                insertCommand.Parameters.AddWithValue("@IsDeleted", false);
+                insertCommand.Parameters.AddWithValue("@AccessFailedCount", 0);
+                insertCommand.Parameters.AddWithValue("@IsLockoutEnabled", 0);
+                insertCommand.Parameters.AddWithValue("@IsPhoneNumberConfirmed", 0);
+                insertCommand.Parameters.AddWithValue("@IsTwoFactorEnabled", 0);
+                insertCommand.Parameters.AddWithValue("@IsEmailConfirmed", 1);
+                insertCommand.Parameters.AddWithValue("@NormalizedUserName", member.FORNAVN);
+                insertCommand.Parameters.AddWithValue("@NormalizedEmailAddress", member.EMAIL);
+                insertCommand.Parameters.AddWithValue("@CanAnswerPhoneCalls", 0);
+                insertCommand.Parameters.AddWithValue("@CanOpenCloseShop", 0);
+                insertCommand.Parameters.AddWithValue("@IsReceptionAllowed", 0);
+                insertCommand.Parameters.AddWithValue("@IsResponsibleForStocks", 0);
+                insertCommand.Parameters.AddWithValue("@IsAdmin", false);
+
+                await insertCommand.ExecuteNonQueryAsync();
+
+            }
+        }
+
+        private async Task InsertCustomerRecord(long userId, MEDLEMMER member, Tenant tenant)
+        {
+            using (var connection = new SqlConnection(_conn))
+            {
+                await connection.OpenAsync();
+
+                var insertCommand = new SqlCommand(@"
+                                   INSERT INTO Customers (
+                                        TenantId, CustomerNo, Address, Postcode, TownCity, Country, TelephoneFax, Website,
+                                        Currency, Site, IsSync, IsSubCustomer, NUMMER, OPRETTET, AENDRET, FORNAVN,
+                                        MELLEMNAVN, EFTERNAVN, ADRESSE1, ADRESSE2, PRIVATTELEFON, ARBEJDSTELEFON,
+                                        MOBILTELEFON, EMAIL, FOEDSELSDAG, NOTER, K1AAR, DB_OENSKERIKKE, DB_SENDALTID,
+                                        DB_UGYLDIG_ADRESSE, DB_FAMILIEN_FAAR_BLADET, DOED, NAAL_OENSKES, OPDATERWINFINANS,
+                                        FKLANDEKODE, FKPOSTNR, VEDLIGEHOLDER_EGNE_STAMDATA, WEB_ADGANGSKODE, MPTITEL,
+                                        MPTITEL_AENDRET, NUVHAC, ALTERNATIV_ADRESSE, TRIAL675, UserId
+                                    )
+                                    VALUES (
+                                        @TenantId, @CustomerNo, @Address, @Postcode, @TownCity, @Country, @TelephoneFax, @Website,
+                                        @Currency, @Site, @IsSync, @IsSubCustomer, @NUMMER, @OPRETTET, @AENDRET, @FORNAVN,
+                                        @MELLEMNAVN, @EFTERNAVN, @ADRESSE1, @ADRESSE2, @PRIVATTELEFON, @ARBEJDSTELEFON,
+                                        @MOBILTELEFON, @EMAIL, @FOEDSELSDAG, @NOTER, @K1AAR, @DB_OENSKERIKKE, @DB_SENDALTID,
+                                        @DB_UGYLDIG_ADRESSE, @DB_FAMILIEN_FAAR_BLADET, @DOED, @NAAL_OENSKES, @OPDATERWINFINANS,
+                                        @FKLANDEKODE, @FKPOSTNR, @VEDLIGEHOLDER_EGNE_STAMDATA, @WEB_ADGANGSKODE, @MPTITEL,
+                                        @MPTITEL_AENDRET, @NUVHAC, @ALTERNATIV_ADRESSE, @TRIAL675, @UserId
+);
+                                ", connection);
+
+                insertCommand.Parameters.AddWithValue("@TenantId", tenant.Id);
+                insertCommand.Parameters.AddWithValue("@CustomerNo", member.NUMMER?.ToString() ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Address", member.ADRESSE1 ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Postcode", member.FKPOSTNR ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@TownCity", member.ADRESSE2 ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Country", member.FKLANDEKODE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@TelephoneFax",
+                    member.MOBILTELEFON ?? member.ARBEJDSTELEFON ?? member.PRIVATTELEFON ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Website", (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Currency", (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@Site", (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@IsSync", false);
+                insertCommand.Parameters.AddWithValue("@IsSubCustomer", false);
+
+                // Custom fields
+                insertCommand.Parameters.AddWithValue("@NUMMER", member.NUMMER ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@OPRETTET", member.OPRETTET ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@AENDRET", member.AENDRET ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@FORNAVN", member.FORNAVN ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@MELLEMNAVN", member.MELLEMNAVN ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@EFTERNAVN", member.EFTERNAVN ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@ADRESSE1", member.ADRESSE1 ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@ADRESSE2", member.ADRESSE2 ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@PRIVATTELEFON", member.PRIVATTELEFON ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@ARBEJDSTELEFON", member.ARBEJDSTELEFON ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@MOBILTELEFON", member.MOBILTELEFON ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@EMAIL", member.EMAIL ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@FOEDSELSDAG", member.FOEDSELSDAG ?? (object)DBNull.Value);
+
+                // Binary data (e.g., NOTER)
+                byte[] noterBytes = new byte[0];
+                insertCommand.Parameters.Add("@NOTER", SqlDbType.VarBinary).Value = (object?)noterBytes ?? DBNull.Value;
+
+                insertCommand.Parameters.AddWithValue("@K1AAR", member.K1AAR ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@DB_OENSKERIKKE", member.DB_OENSKERIKKE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@DB_SENDALTID", member.DB_SENDALTID ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@DB_UGYLDIG_ADRESSE", member.DB_UGYLDIG_ADRESSE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@DB_FAMILIEN_FAAR_BLADET", member.DB_FAMILIEN_FAAR_BLADET ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@DOED", member.DOED ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@NAAL_OENSKES", member.NAAL_OENSKES ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@OPDATERWINFINANS", member.OPDATERWINFINANS ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@FKLANDEKODE", member.FKLANDEKODE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@FKPOSTNR", member.FKPOSTNR ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@VEDLIGEHOLDER_EGNE_STAMDATA", member.VEDLIGEHOLDER_EGNE_STAMDATA ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@WEB_ADGANGSKODE", member.WEB_ADGANGSKODE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@MPTITEL", member.MPTITEL ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@MPTITEL_AENDRET", member.MPTITEL_AENDRET ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@NUVHAC", member.NUVHAC ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@ALTERNATIV_ADRESSE", member.ALTERNATIV_ADRESSE ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@TRIAL675", member.TRIAL675 ?? (object)DBNull.Value);
+                insertCommand.Parameters.AddWithValue("@UserId", userId);
+
+                await insertCommand.ExecuteNonQueryAsync();
+            }
+        }
+
+        private async Task InsertUserTenantRecord(Tenant tenant, User newUser)
+        {
+            using (var connection = new SqlConnection(_conn))
+            {
+                await connection.OpenAsync();
+
+                var insertCommand = new SqlCommand(@"
+                                INSERT INTO UserTenants (UserId, TenantId)
+                                VALUES (@UserId, @TenantId)
+                            ", connection);
+
+                insertCommand.Parameters.AddWithValue("@UserId", newUser.Id);
+                insertCommand.Parameters.AddWithValue("@TenantId", tenant.Id);
+
+                await insertCommand.ExecuteNonQueryAsync();
+            }
         }
 
         public async Task<bool> ImportClubsData()
