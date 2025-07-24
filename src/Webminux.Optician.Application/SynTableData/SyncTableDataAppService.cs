@@ -3,6 +3,7 @@ using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.Domain.Uow;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -37,6 +38,7 @@ namespace Webminux.Optician.SynTableData
         private readonly IRepository<UserTenant> _userTenantRepository;
         internal readonly UserManager _userManager;
         internal readonly IRepository<UserType, int> _userTypeRepository;
+        private readonly string _conn = "Data Source=mssql3.unoeuro.com;Initial Catalog=crm_beckit_dk_db_1;User Id=crm_beckit_dk;Password=y2eBt39pafx4; connect timeout=10000";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SyncTableDataAppService"/> class.
@@ -61,49 +63,19 @@ namespace Webminux.Optician.SynTableData
         /// <summary>
         /// This is an application service class for Import Data for Clubs and Members.
         /// </summary>
-        public async Task<bool> ImportData()
+        public async Task<bool> ImportCustomersData()
         {
             try
             {
                 using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
                 {
                     var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
-                    var userId = 5;//AbpSession.UserId.Value;
+                    var userId = AbpSession.UserId ?? 1;
                     
-                    //using (var unitOfWork = _unitOfWorkManager.Begin())
-                    //{
-                   
                     var clientClubs = await _BRIDGEKLUBBERRepository.GetAllListAsync();
                     var clientMembers = await _MEDLEMMERRepository.GetAllListAsync();
                     var clientClubMembers = await _MEDLEMSKABERRepository.GetAllListAsync();
 
-                    foreach (var club in clientClubs)
-                    {
-                        try
-                        {
-                            var existingTenant = _tenantRepository
-                            .GetAll().Where(t => t.TenancyName.ToLower() == club.NAVN.ToLower()).FirstOrDefault();
-                            if (existingTenant == null)
-                            {
-                              
-                                var newTenant = MapBridgeKlubberToTenant(club, userId);
-
-                                using (var uow = _unitOfWorkManager.Begin(new UnitOfWorkOptions { IsTransactional = false }))
-                                {
-                                    await _tenantRepository.InsertAsync(newTenant);
-                                    await _unitOfWorkManager.Current.SaveChangesAsync();
-                                    await uow.CompleteAsync();
-                                }
-
-                            }
-                        }
-                        catch (Exception e)
-                        {
-
-                            throw;
-                        }
-
-                    }
 
 
                     foreach (var item in clientClubMembers)
@@ -199,6 +171,8 @@ namespace Webminux.Optician.SynTableData
                             //}
 
                             clientCustomer.UserId = newUser.Id;
+
+
                             await _customerRepository.InsertAsync(clientCustomer);
                             await _unitOfWorkManager.Current.SaveChangesAsync();
 
@@ -230,6 +204,116 @@ namespace Webminux.Optician.SynTableData
             }
 
         }
+
+        public async Task<bool> ImportClubsData()
+        {
+            try
+            {
+                using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MustHaveTenant, AbpDataFilters.MayHaveTenant))
+                {
+                    var userTypeId = _userTypeRepository.GetAll().Where(x => x.Name == OpticianConsts.UserTypes.Employee).FirstOrDefault().Id;
+                    var userId = AbpSession.UserId ?? 1;
+
+                    var clientClubs = await _BRIDGEKLUBBERRepository.GetAllListAsync();
+                    foreach (var club in clientClubs)
+                    {
+                        await InsertTenantIfNotExistsAsync(club, userId, _conn);
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
+        }
+        private async Task InsertTenantIfNotExistsAsync(BRIDGEKLUBBER club, long userId, string connectionString)
+        {
+            byte[] binaryData = new byte[] { 0x01, 0x02, 0x03 };
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
+                var command = new SqlCommand(@"
+                    IF NOT EXISTS (
+                        SELECT 1 FROM AbpTenants WHERE LOWER(TenancyName) = LOWER(@TenancyName)
+                    )
+                    BEGIN
+                        INSERT INTO AbpTenants (
+                            IsActive, IsDeleted, Klubnummer, FKDistriktsId, Name, TenancyName,
+                            CreationTime, CreatorUserId, LastModificationTime, Klubtype, Startdato,
+                            Spillested, Adresse1, Adresse2, Telefon, Telefax, Email, Www, Noter,
+                            Saesonstart, Mpordning, Ikkeryger, Installationskode, Sikkerhedskode,
+                            BrugerBC, Udskriv_klubLabels, Modtager_DB, Foerste_medlemsaAr,
+                            Halvt_KM_Kontingent, OpdaterWinFinans, Tilbyder_undervisning,
+                            FKLandekode, FKPostnr, Eksportkode, Eksportbruger, Bankkonto,
+                            Overfoeres, Instlokalt, FravaelgHAC, FTPKode, Dansk_bridge_procent,
+                            Dansk_bridge_antal
+                        )
+                        VALUES (
+                            @IsActive, @IsDeleted, @Klubnummer, @FKDistriktsId, @Name, @TenancyName,
+                            @CreationTime, @CreatorUserId, @LastModificationTime, @Klubtype, @Startdato,
+                            @Spillested, @Adresse1, @Adresse2, @Telefon, @Telefax, @Email, @Www, @Noter,
+                            @Saesonstart, @Mpordning, @Ikkeryger, @Installationskode, @Sikkerhedskode,
+                            @BrugerBC, @Udskriv_klubLabels, @Modtager_DB, @Foerste_medlemsaAr,
+                            @Halvt_KM_Kontingent, @OpdaterWinFinans, @Tilbyder_undervisning,
+                            @FKLandekode, @FKPostnr, @Eksportkode, @Eksportbruger, @Bankkonto,
+                            @Overfoeres, @Instlokalt, @FravaelgHAC, @FTPKode, @Dansk_bridge_procent,
+                            @Dansk_bridge_antal
+                        )
+                    END", connection);
+
+                // Set parameters
+                command.Parameters.AddWithValue("@IsActive", true);
+                command.Parameters.AddWithValue("@IsDeleted", false);
+                command.Parameters.AddWithValue("@Klubnummer", club.KLUBNUMMER ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@FKDistriktsId", club.FKDISTRIKTSID ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Name", club.NAVN ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@TenancyName", club.NAVN ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@CreationTime", club.OPRETTET ?? DateTime.UtcNow);
+                command.Parameters.AddWithValue("@CreatorUserId", userId);
+                command.Parameters.AddWithValue("@LastModificationTime", (object?)club.AENDRET ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Klubtype", (object?)club.KLUBTYPE ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Startdato", (object?)club.STARTDATO ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Spillested", club.SPILLESTED ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Adresse1", club.ADRESSE1 ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Adresse2", club.ADRESSE2 ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Telefon", club.TELEFON ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Telefax", club.TELEFAX ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Email", club.EMAIL ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Www", club.WWW ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Noter", binaryData);
+                command.Parameters.AddWithValue("@Saesonstart", club.SAESONSTART ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Mpordning", (object?)club.MPORDNING ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Ikkeryger", (object?)club.IKKERYGER ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Installationskode", club.INSTALLATIONSKODE ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Sikkerhedskode", club.SIKKERHEDSKODE ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@BrugerBC", (object?)club.BRUGERBC ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Udskriv_klubLabels", (object?)club.UDSKRIV_KLUBLABELS ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Modtager_DB", (object?)club.MODTAGER_DB ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Foerste_medlemsaAr", (object?)club.FOERSTE_MEDLEMSAAR ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Halvt_KM_Kontingent", (object?)club.HALVT_KM_KONTINGENT ?? DBNull.Value);
+                command.Parameters.AddWithValue("@OpdaterWinFinans", (object?)club.OPDATERWINFINANS ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Tilbyder_undervisning", (object?)club.TILBYDER_UNDERVISNING ?? DBNull.Value);
+                command.Parameters.AddWithValue("@FKLandekode", club.FKLANDEKODE ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@FKPostnr", club.FKPOSTNR ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Eksportkode", club.EKSPORTKODE ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Eksportbruger", club.EKSPORTBRUGER ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Bankkonto", club.BANKKONTO ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Overfoeres", (object?)club.OVERFOERES ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Instlokalt", (object?)club.INSTLOKALT ?? DBNull.Value);
+                command.Parameters.AddWithValue("@FravaelgHAC", (object?)club.FRAVAELGHAC ?? DBNull.Value);
+                command.Parameters.AddWithValue("@FTPKode", club.FTPKODE ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@Dansk_bridge_procent", (object?)club.DANSK_BRIDGE_PROCENT ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Dansk_bridge_antal", (object?)club.DANSK_BRIDGE_ANTAL ?? DBNull.Value);
+
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+
 
         public static Tenant MapBridgeKlubberToTenant(BRIDGEKLUBBER bridgeKlubber, long userId)
         {

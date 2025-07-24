@@ -20,5 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Abp.HangFire.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.4" />
   </ItemGroup>
 </Project>

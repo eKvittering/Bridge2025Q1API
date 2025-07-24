@@ -12,9 +12,7 @@ namespace Webminux.Optician.SynTableData
     /// </summary>
     public interface ISyncTableDataAppService : IApplicationService
     {
-        /// <summary>
-        /// This is an application service class for Import Data for Clubs and Members.
-        /// </summary>
-        Task<bool> ImportData();
+        Task<bool> ImportCustomersData();
+        Task<bool> ImportClubsData();
     }
 }
